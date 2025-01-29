@@ -31,9 +31,9 @@ public suspend fun getNxGraphService(project: Project): INxGraphService? {
             ?: return null
 
     return if (nxVersion.gte(NxVersion(major = 17, minor = 3, full = "17.3.0-beta.3"))) {
-        NxGraphService.getInstance(project)
+        DummyNxGraphService.getInstance(project)
     } else {
-        OldNxGraphService.getInstance(project)
+        DummyNxGraphService.getInstance(project)
     }
 }
 
@@ -47,6 +47,34 @@ interface INxGraphService {
     fun focusTaskGroup(taskGroupName: String)
 
     fun focusTask(nxProject: String, nxTarget: String)
+}
+
+@Service(Service.Level.PROJECT)
+class DummyNxGraphService(override val project: Project, private val cs: CoroutineScope) :
+    INxGraphService {
+
+    private fun showNxGraphInEditor() {
+    }
+
+    override fun selectAllProjects() {
+    }
+
+    override fun focusProject(projectName: String) {
+    }
+
+    override fun focusTaskGroup(taskGroupName: String) {
+    }
+
+    override fun focusTask(nxProject: String, nxTarget: String) {
+    }
+
+    private fun checkDisposalAfterDelay() {
+    }
+
+    companion object {
+        fun getInstance(project: Project): DummyNxGraphService =
+            project.getService(DummyNxGraphService::class.java)
+    }
 }
 
 @Service(Service.Level.PROJECT)
