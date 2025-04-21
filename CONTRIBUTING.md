@@ -20,6 +20,17 @@ Alternatively, if you are using IntelliJ IDEA to develop Nx Console, it can take
 
 ## Development
 
+### Summary by Thomas
+
+```
+corepack enable
+yarn install
+yarn nx run-many --target=build
+```
+
+Then distribute `dist/apps/intellij/distributions/nx-console-1.99.1-thomas.zip`.
+Install it in IntelliJ IDEA using "Install plugin from disk".
+
 ### Running the Extension locally
 
 #### VSCode
