@@ -7,6 +7,7 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.observable.util.addItemListener
 import com.intellij.openapi.project.Project
@@ -105,7 +106,7 @@ class NewProjectDetailsBrowser(private val project: Project, private val file: V
 
     private val loadingPanel = JBLoadingPanel(BorderLayout(), this)
     private val progressBar = JProgressBar()
-    private val multiDisclaimerPanel: JPanel
+    private lateinit var multiDisclaimerPanel: JPanel
     private val projectsComboBox = ComboBox<String>()
     private val projectsComboBoxListener = ItemListener { e ->
         if (e != null && e.stateChange == ItemEvent.SELECTED) {
@@ -117,8 +118,8 @@ class NewProjectDetailsBrowser(private val project: Project, private val file: V
 
     private var oldBrowser: OldProjectDetailsBrowser? = null
 
-    private val browser: JBCefBrowser = JBCefBrowser()
-    private val interactionEventQuery: JBCefJSQuery
+    private lateinit var browser: JBCefBrowser
+    private lateinit var interactionEventQuery: JBCefJSQuery
 
     private lateinit var stateMachine: StateMachine
     private lateinit var messageBusConnection: SimpleMessageBusConnection
@@ -126,40 +127,40 @@ class NewProjectDetailsBrowser(private val project: Project, private val file: V
     private val scope: CoroutineScope = ProjectLevelCoroutineHolderService.getInstance(project).cs
 
     init {
-        progressBar.setUI(
-            object : DarculaProgressBarUI() {
-                override fun getRemainderColor(): Color {
-                    return UIUtil.getPanelBackground()
-                }
-            }
-        )
+//        progressBar.setUI(
+//            object : DarculaProgressBarUI() {
+//                override fun getRemainderColor(): Color {
+//                    return UIUtil.getPanelBackground()
+//                }
+//            }
+//        )
+//
+//        multiDisclaimerPanel =
+//            JPanel().apply {
+//                val flowLayout = FlowLayout(FlowLayout.LEFT, 5, 5)
+//                layout = flowLayout
+//                add(JBLabel("Select project"), BorderLayout.NORTH)
+//                add(projectsComboBox, BorderLayout.CENTER)
+//                isVisible = false
+//            }
+//
+//        loadingPanel.add(
+//            JPanel(BorderLayout()).apply {
+//                add(progressBar, BorderLayout.NORTH)
+//                add(multiDisclaimerPanel, BorderLayout.SOUTH)
+//            },
+//            BorderLayout.NORTH,
+//        )
+//
+//        loadingPanel.add(browser.component, BorderLayout.CENTER)
+//
+//        rootPanel.add(loadingPanel, BorderLayout.CENTER)
+//
+//        browser.setOpenLinksInExternalBrowser(true)
+//        browser.jbCefClient.setProperty(JBCefClient.Properties.JS_QUERY_POOL_SIZE, 100)
+//        interactionEventQuery = createInteractionEventQuery()
 
-        multiDisclaimerPanel =
-            JPanel().apply {
-                val flowLayout = FlowLayout(FlowLayout.LEFT, 5, 5)
-                layout = flowLayout
-                add(JBLabel("Select project"), BorderLayout.NORTH)
-                add(projectsComboBox, BorderLayout.CENTER)
-                isVisible = false
-            }
-
-        loadingPanel.add(
-            JPanel(BorderLayout()).apply {
-                add(progressBar, BorderLayout.NORTH)
-                add(multiDisclaimerPanel, BorderLayout.SOUTH)
-            },
-            BorderLayout.NORTH,
-        )
-
-        loadingPanel.add(browser.component, BorderLayout.CENTER)
-
-        rootPanel.add(loadingPanel, BorderLayout.CENTER)
-
-        browser.setOpenLinksInExternalBrowser(true)
-        browser.jbCefClient.setProperty(JBCefClient.Properties.JS_QUERY_POOL_SIZE, 100)
-        interactionEventQuery = createInteractionEventQuery()
-
-        init()
+//        init()
     }
 
     val component = rootPanel
@@ -426,6 +427,9 @@ class NewProjectDetailsBrowser(private val project: Project, private val file: V
     }
 
     private suspend fun showPDV(graphBasePath: String, pdvData: String) {
+        thisLogger().info("PATCHED: not executing showPDV in NewProjectDetailsBrowser")
+        if (true) return
+
         if (browser.isDisposed || interactionEventQuery.isDisposed) {
             return
         }
@@ -484,6 +488,9 @@ class NewProjectDetailsBrowser(private val project: Project, private val file: V
     }
 
     private suspend fun updatePDVData(pdvData: String) {
+        thisLogger().info("PATCHED: not executing updatePDVData in NewProjectDetailsBrowser")
+        if (true) return
+
         if (browser.isDisposed) {
             return
         }
@@ -786,7 +793,7 @@ class NewProjectDetailsBrowser(private val project: Project, private val file: V
         }
 
         projectsComboBox.removeItemListener(projectsComboBoxListener)
-        Disposer.dispose(browser)
-        Disposer.dispose(interactionEventQuery)
+//        Disposer.dispose(browser)
+//        Disposer.dispose(interactionEventQuery)
     }
 }
