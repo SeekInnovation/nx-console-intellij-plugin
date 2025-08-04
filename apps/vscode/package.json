@@ -2,7 +2,7 @@
   "name": "angular-console",
   "displayName": "Nx Console",
   "description": "The UI for Monorepos, providing visual workflows and enriching your AI Chat with deep insights",
-  "version": "17.28.2",
+  "version": "0.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/nrwl/nx-console.git"
@@ -25,7 +25,7 @@
   },
   "license": "MIT",
   "engines": {
-    "vscode": "^1.96.0"
+    "vscode": "^1.96.2"
   },
   "keywords": [
     "angular",
@@ -114,9 +114,20 @@
         },
         {
           "command": "nx.configureMcpServer",
-          "when": "view == nxProjects && isInCursor && isNxWorkspace && !hasNxMcpConfigured",
+          "when": "view == nxProjects && (isInCursor || isInVSCode) && isNxWorkspace && !hasNxMcpConfigured",
           "group": "navigation@0",
           "title": "Add Nx to Cursor Agent"
+        },
+        {
+          "command": "nx.addAgentRules",
+          "when": "view == nxProjects && (isInCursor || isInVSCode) && isNxWorkspace && hasNxMcpConfigured && !config.nxConsole.generateAiAgentRules",
+          "group": "navigation@0",
+          "title": "Add Nx Agent Rules"
+        },
+        {
+          "command": "nxMigrate.refresh",
+          "when": "view == nxMigrate",
+          "group": "navigation"
         }
       ],
       "view/item/context": [
@@ -331,6 +342,22 @@
           "when": "false"
         },
         {
+          "command": "nxCloud.applyAiFix",
+          "when": "false"
+        },
+        {
+          "command": "nxCloud.applyAiFixLocally",
+          "when": "false"
+        },
+        {
+          "command": "nxCloud.rejectAiFix",
+          "when": "false"
+        },
+        {
+          "command": "nxCloud.openFixDetails",
+          "when": "false"
+        },
+        {
           "command": "nx.run-many",
           "when": "isNxWorkspace"
         },
@@ -360,10 +387,6 @@
         },
         {
           "command": "nx.list",
-          "when": "isNxWorkspace"
-        },
-        {
-          "command": "nx.migrate",
           "when": "isNxWorkspace"
         },
         {
@@ -416,7 +439,11 @@
         },
         {
           "command": "nx.configureMcpServer",
-          "when": "isNxWorkspace && !hasNxMcpConfigured"
+          "when": "isNxWorkspace && !hasNxMcpConfigured && (isInCursor || isInVSCode)"
+        },
+        {
+          "command": "nx.addAgentRules",
+          "when": "isNxWorkspace && hasNxMcpConfigured && !config.nxConsole.generateAiAgentRules && (isInCursor || isInVSCode)"
         }
       ]
     },
@@ -435,6 +462,12 @@
           {
             "name": "explain-cipe",
             "description": "Explain the CI pipeline execution failure"
+          },
+          {
+            "name": "fill-generate-ui",
+            "description": "Fill the Nx generate UI with options",
+            "isSticky": false,
+            "when": "nxConsole.isFillingGenerateUi == true"
           }
         ],
         "disambiguation": [
@@ -501,13 +534,11 @@
       },
       {
         "name": "nx_generator-details",
+        "modelDescription": "View detailed information about an Nx generator",
+        "displayName": "Generator Details",
         "tags": [
           "nx"
         ],
-        "toolReferenceName": "nxGeneratorDetails",
-        "displayName": "Generator Details",
-        "modelDescription": "The detailed JSON schema for an nx generator",
-        "icon": "$(code-oss)",
         "inputSchema": {
           "type": "object",
           "properties": {
@@ -544,7 +575,7 @@
         }
       },
       {
-        "name": "nx_visualize_project_graph_project",
+        "name": "nx_visualize-project-graph-project",
         "tags": [
           "nx"
         ],
@@ -566,7 +597,7 @@
         }
       },
       {
-        "name": "nx_visualize_task_graph",
+        "name": "nx_visualize-task-graph",
         "tags": [
           "nx"
         ],
@@ -590,6 +621,67 @@
             "projectName",
             "taskName"
           ]
+        }
+      },
+      {
+        "name": "nx_available-plugins",
+        "modelDescription": "Lists available Nx plugins, including official and local workspace plugins. Use this to answer questions about nx plugins or integrations.",
+        "displayName": "Available Nx Plugins",
+        "icon": "$(plug)",
+        "toolReferenceName": "nxAvailablePlugins",
+        "tags": [
+          "nx"
+        ],
+        "inputSchema": {
+          "type": "object",
+          "properties": {}
+        }
+      },
+      {
+        "name": "nx_open-generate-ui",
+        "modelDescription": "Opens the Nx generate UI with prefilled options",
+        "displayName": "Nx Generate UI",
+        "icon": "$(window)",
+        "tags": [
+          "nx"
+        ],
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "generatorName": {
+              "type": "string",
+              "description": "The name of the generator to open in the UI."
+            },
+            "options": {
+              "type": "object",
+              "description": "The options to prefill in the UI.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "cwd": {
+              "type": "string",
+              "description": "The current working directory to use for the generator. Relative to the nx workspace root. If not specified, will default to the nx workspace root."
+            }
+          },
+          "required": [
+            "generatorName",
+            "options"
+          ]
+        }
+      },
+      {
+        "name": "nx_visualize-full-project-graph",
+        "tags": [
+          "nx"
+        ],
+        "modelDescription": "Visualizes the entire Nx project graph for the workspace",
+        "icon": "$(source-control)",
+        "displayName": "Nx Full Project Graph",
+        "toolReferenceName": "nxVisualizeFullProjectGraph",
+        "inputSchema": {
+          "type": "object",
+          "properties": {}
         }
       }
     ],
@@ -743,11 +835,6 @@
       },
       {
         "category": "Nx",
-        "title": "migrate",
-        "command": "nx.migrate"
-      },
-      {
-        "category": "Nx",
         "title": "Generate (UI)",
         "command": "nx.generate.ui",
         "icon": "$(browser)"
@@ -859,6 +946,23 @@
         }
       },
       {
+        "title": "Apply AI Fix",
+        "command": "nxCloud.applyAiFix"
+      },
+      {
+        "title": "Apply AI Fix Locally",
+        "command": "nxCloud.applyAiFixLocally"
+      },
+      {
+        "title": "Reject AI Fix",
+        "command": "nxCloud.rejectAiFix"
+      },
+      {
+        "title": "Open Fix Details",
+        "command": "nxCloud.openFixDetails",
+        "category": "Nx Cloud"
+      },
+      {
         "category": "Nx",
         "title": "Show Nx Errors in Problems View",
         "command": "nxConsole.showProblems",
@@ -869,6 +973,18 @@
         "title": "Configure Nx MCP Server",
         "command": "nx.configureMcpServer",
         "icon": "$(wand)"
+      },
+      {
+        "title": "Refresh Nx Migrate View",
+        "command": "nxMigrate.refresh",
+        "icon": "$(refresh)",
+        "when": "isNxWorkspace"
+      },
+      {
+        "title": "Add Nx Agent Rules",
+        "command": "nx.addAgentRules",
+        "icon": "$(wand)",
+        "when": "isNxWorkspace"
       }
     ],
     "configuration": {
@@ -885,8 +1001,7 @@
             "run-many",
             "affected",
             "affected --graph",
-            "list",
-            "migrate"
+            "list"
           ],
           "markdownDescription": "Common Nx commands that will be available in the sidebar view. You can specify either \n - Arbitrary Nx commands, like `build:example-app` or `nx run my-lib:test` (note that you can omit the prefixed `nx`) or  \n - Nx commands that are available through Nx Console, like `run-many`. They will be executed using the Nx Console UI."
         },
@@ -985,6 +1100,11 @@
           ],
           "default": "all",
           "description": "Controls which notifications are shown for Nx Cloud."
+        },
+        "nxConsole.generateAiAgentRules": {
+          "type": "boolean",
+          "default": false,
+          "description": "Autogenerate Nx-specific AI agent rules for the workspace if the Nx MCP is configured."
         }
       }
     },
@@ -1068,7 +1188,7 @@
       },
       {
         "view": "nxCloudRecentCIPE",
-        "contents": "No CI Pipeline Executions from local branches have run in the past hour. You can view all CI Pipeline Executions in the Nx Cloud application. \n [Open Nx Cloud App](command:nxCloud.openApp)",
+        "contents": "No Pull Requests from local branches have run recently. You can view all PRs and their CI Pipelines in the Nx Cloud application. \n [Open Nx Cloud App](command:nxCloud.openApp)",
         "when": "nxCloudView.error == false"
       },
       {
@@ -1080,6 +1200,11 @@
         "view": "nxCloudRecentCIPE",
         "contents": "An error occured while accessing the Nx Cloud API. \n [View Error Output](command:nxCloud.viewRecentError)",
         "when": "nxCloudView.error == other"
+      },
+      {
+        "view": "nxCloudRecentCIPE",
+        "contents": "A network error occured while accessing the Nx Cloud API. \n Please check your internet connection and try again. \n [Refresh Nx Cloud View](command:nxCloud.refresh)",
+        "when": "nxCloudView.error == network"
       },
       {
         "view": "nxCloudLoading",
@@ -1156,32 +1281,44 @@
         {
           "id": "nxProjects",
           "name": "Projects",
-          "when": "isNxWorkspace"
+          "when": "isNxWorkspace",
+          "visibility": "visible"
         },
         {
           "id": "nxCloudLoading",
           "name": "Nx Cloud",
-          "when": "isNxWorkspace && nxCloudView.visible.loading"
+          "when": "isNxWorkspace && nxCloudView.visible.loading",
+          "visibility": "visible"
         },
         {
           "id": "nxCloudOnboarding",
           "type": "webview",
           "name": "Nx Cloud :: CI Optimizations",
-          "when": "isNxWorkspace && nxCloudView.visible.onboarding"
+          "when": "isNxWorkspace && nxCloudView.visible.onboarding",
+          "visibility": "visible"
         },
         {
           "id": "nxCloudRecentCIPE",
-          "name": "Nx Cloud :: Recent CI Pipeline Executions",
-          "when": "isNxWorkspace && nxCloudView.visible.recent-cipe"
+          "name": "Nx Cloud :: Your PRs",
+          "when": "isNxWorkspace && nxCloudView.visible.recent-cipe",
+          "visibility": "visible"
         },
         {
           "id": "nxCommands",
           "name": "Common Nx Commands",
-          "when": "isNxWorkspace"
+          "when": "isNxWorkspace",
+          "visibility": "collapsed"
         },
         {
           "id": "nxHelpAndFeedback",
           "name": "Help and Feedback",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "nxMigrate",
+          "type": "webview",
+          "name": "Nx Migrate ",
+          "when": "isNxWorkspace",
           "visibility": "collapsed"
         }
       ]
@@ -1189,5 +1326,8 @@
   },
   "extensionDependencies": [
     "vscode.git"
-  ]
+  ],
+  "dependencies": {
+    "@napi-rs/wasm-runtime": "0.2.4"
+  }
 }

@@ -2,6 +2,9 @@
  * Telemetry Events are defined here. They are
  * - grouped by namespace, separated with dots
  * - kebab-cased
+ * these are compared to apps/intellij/src/main/kotlin/dev/nx/console/telemetry/TelemetryTypes.kt
+ * through the @nx-console/workspace:telemetry-check target
+ * keep them in sync with IntelliJ!
  */
 
 export type TelemetryEvents =
@@ -27,6 +30,11 @@ export type TelemetryEvents =
   | 'cloud.view-run'
   | 'cloud.explain-cipe-error'
   | 'cloud.fix-cipe-error'
+  | 'cloud.show-ai-fix-notification'
+  | 'cloud.show-ai-fix'
+  | 'cloud.apply-ai-fix'
+  | 'cloud.reject-ai-fix'
+  | 'cloud.open-fix-details'
   // graph
   | 'graph.show-all'
   | 'graph.show-affected'
@@ -38,6 +46,7 @@ export type TelemetryEvents =
   | 'graph.interaction-run-help'
   // tasks
   | 'tasks.run'
+  | 'tasks.init'
   | 'tasks.copy-to-clipboard'
   | 'tasks.run-many'
   // generate

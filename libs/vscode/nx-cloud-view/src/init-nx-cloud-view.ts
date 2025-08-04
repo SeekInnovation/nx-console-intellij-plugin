@@ -24,13 +24,22 @@ import {
   window,
 } from 'vscode';
 import { createActor } from 'xstate';
-import { compareCIPEDataAndSendNotification } from './cipe-notifications';
+import {
+  compareCIPEDataAndSendNotification,
+  disposeAiFixStatusBarItem,
+} from './cipe-notifications';
 import { CloudOnboardingViewProvider } from './cloud-onboarding-view';
 import { CloudRecentCIPEProvider } from './cloud-recent-cipe-view';
 import { machine } from './cloud-view-state-machine';
 import { TelemetryEventSource } from '@nx-console/shared-telemetry';
+import {
+  closeCloudFixDiffTab,
+  NxCloudFixWebview,
+} from './nx-cloud-fix-webview';
 
 export function initNxCloudView(context: ExtensionContext) {
+  closeCloudFixDiffTab();
+
   // set up state machine & listeners
   const actor = createActor(
     machine.provide({
@@ -59,6 +68,7 @@ export function initNxCloudView(context: ExtensionContext) {
   ).start();
   CloudOnboardingViewProvider.create(context, actor);
   CloudRecentCIPEProvider.create(context, actor);
+  NxCloudFixWebview.create(context, actor);
 
   async function updateOnboarding() {
     const onboardingInfo = await getCloudOnboardingInfo();
@@ -79,6 +89,7 @@ export function initNxCloudView(context: ExtensionContext) {
     showRefreshLoadingAtLocation({ viewId: 'nxCloudLoading' }),
     showRefreshLoadingAtLocation({ viewId: 'nxCloudRecentCIPE' }),
     showRefreshLoadingAtLocation({ viewId: 'nxCloudOnboarding' }),
+    { dispose: () => disposeAiFixStatusBarItem() },
   );
 
   // register commands
@@ -160,8 +171,10 @@ export function runNxConnect(source: TelemetryEventSource = 'command') {
   getTelemetry().logUsage('cloud.connect', {
     source,
   });
+  // we want to make sure to always use `npx nx@latest connect` here
   CliTaskProvider.instance.executeTask({
     command: 'connect',
+    useLatestNxVersion: true,
     flags: [],
   });
 }
@@ -174,7 +187,8 @@ const getStateMachineLogger = (context: ExtensionContext) =>
         if (
           event.type === '@xstate.snapshot' &&
           snapshot.value &&
-          (event.actorRef as any)['_systemId'] === 'cloud-view'
+          (event.actorRef as any)['_systemId'] === 'cloud-view' &&
+          snapshot.value !== 'recent-cipe'
         ) {
           getOutputChannel().appendLine(
             `Nx Cloud - ${JSON.stringify(snapshot.value)}`,

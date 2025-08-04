@@ -1,51 +1,42 @@
 import { CIPEInfo, CIPERun, CIPERunGroup } from '@nx-console/shared-types';
 import { isCompleteStatus, isFailedStatus } from '@nx-console/shared-utils';
-import { AbstractTreeProvider, isInCursor } from '@nx-console/vscode-utils';
+import { getNxCloudStatus } from '@nx-console/vscode-nx-workspace';
+import { showErrorMessageWithOpenLogs } from '@nx-console/vscode-output-channels';
+import { getTelemetry } from '@nx-console/vscode-telemetry';
+import {
+  AbstractTreeProvider,
+  sendMessageToAgent,
+} from '@nx-console/vscode-utils';
 import { isDeepStrictEqual } from 'util';
 import {
   commands,
   Disposable,
-  env,
   ExtensionContext,
   FileDecoration,
   FileDecorationProvider,
   ProviderResult,
   ThemeColor,
   ThemeIcon,
-  TreeItem,
   TreeItemCollapsibleState,
+  TreeView,
   Uri,
   window,
 } from 'vscode';
 import { ActorRef, EventObject } from 'xstate';
+import {
+  BaseRecentCIPETreeItem,
+  CIPETreeItem as CIPETreeItemInterface,
+  FailedTaskTreeItem as FailedTaskTreeItemInterface,
+  RunGroupTreeItem as RunGroupTreeItemInterface,
+  RunTreeItem as RunTreeItemInterface,
+} from './base-tree-item';
 import { formatMillis } from './format-time';
-import { getTelemetry } from '@nx-console/vscode-telemetry';
-import { showErrorMessageWithOpenLogs } from '@nx-console/vscode-output-channels';
-import { getNxCloudStatus } from '@nx-console/vscode-nx-workspace';
+import { NxCloudFixTreeItem } from './nx-cloud-fix-tree-item';
 
-abstract class BaseRecentCIPETreeItem extends TreeItem {
-  abstract type: 'CIPE' | 'runGroup' | 'run' | 'label' | 'failedTask';
-
-  abstract getChildren(): ProviderResult<BaseRecentCIPETreeItem[]>;
-
-  isCIPETreeItem(): this is CIPETreeItem {
-    return this.type === 'CIPE';
-  }
-
-  isRunGroupTreeItem(): this is RunGroupTreeItem {
-    return this.type === 'runGroup';
-  }
-
-  isRunTreeItem(): this is RunTreeItem {
-    return this.type === 'run';
-  }
-
-  isFailedTaskTreeItem(): this is FailedTaskTreeItem {
-    return this.type === 'failedTask';
-  }
-}
-
-class CIPETreeItem extends BaseRecentCIPETreeItem implements Disposable {
+export class CIPETreeItem
+  extends BaseRecentCIPETreeItem
+  implements CIPETreeItemInterface, Disposable
+{
   type = 'CIPE' as const;
 
   private timeoutDisposable?: Disposable;
@@ -86,7 +77,13 @@ class CIPETreeItem extends BaseRecentCIPETreeItem implements Disposable {
 
     this.id = cipe.ciPipelineExecutionId;
     this.setIcon();
-    this.contextValue = cipe.commitUrl ? 'cipe-commit' : 'cipe';
+
+    // Set context value based on available features
+    let contextValue = 'cipe';
+    if (cipe.commitUrl) {
+      contextValue = 'cipe-commit';
+    }
+    this.contextValue = contextValue;
   }
 
   private updateItemAfterSecond() {
@@ -140,16 +137,25 @@ class CIPETreeItem extends BaseRecentCIPETreeItem implements Disposable {
             ? `${failedTasks}/${totalTasks} tasks failed. Failed Runs:`
             : 'Failed Runs:';
 
-        return [
-          new LabelTreeItem(label),
+        const items: BaseRecentCIPETreeItem[] = [new LabelTreeItem(label)];
+
+        // Add failed runs
+        items.push(
           ...this.cipe.runGroups.flatMap((runGroup) =>
             runGroup.runs
               .filter((run) => run.status && isFailedStatus(run.status))
               .map(
-                (run) => new RunTreeItem(run, this.cipe.ciPipelineExecutionId),
+                (run) =>
+                  new RunTreeItem(
+                    run,
+                    this.cipe.ciPipelineExecutionId,
+                    runGroup,
+                  ),
               ),
           ),
-        ];
+        );
+
+        return items;
       }
     }
 
@@ -162,7 +168,12 @@ class CIPETreeItem extends BaseRecentCIPETreeItem implements Disposable {
 
     if (this.cipe.runGroups.length === 1) {
       return this.cipe.runGroups[0].runs.map(
-        (run) => new RunTreeItem(run, this.cipe.ciPipelineExecutionId),
+        (run) =>
+          new RunTreeItem(
+            run,
+            this.cipe.ciPipelineExecutionId,
+            this.cipe.runGroups[0],
+          ),
       );
     } else {
       return this.cipe.runGroups.map((runGroup) => {
@@ -176,7 +187,10 @@ class CIPETreeItem extends BaseRecentCIPETreeItem implements Disposable {
   }
 }
 
-class RunGroupTreeItem extends BaseRecentCIPETreeItem {
+export class RunGroupTreeItem
+  extends BaseRecentCIPETreeItem
+  implements RunGroupTreeItemInterface
+{
   type = 'runGroup' as const;
 
   constructor(
@@ -202,16 +216,22 @@ class RunGroupTreeItem extends BaseRecentCIPETreeItem {
     if (this.runGroup.runs.length === 0) {
       return [new LabelTreeItem('Waiting for Nx tasks...')];
     }
-    return this.runGroup.runs.map((run) => new RunTreeItem(run, this.cipeId));
+    return this.runGroup.runs.map(
+      (run) => new RunTreeItem(run, this.cipeId, this.runGroup),
+    );
   }
 }
 
-class RunTreeItem extends BaseRecentCIPETreeItem {
+export class RunTreeItem
+  extends BaseRecentCIPETreeItem
+  implements RunTreeItemInterface
+{
   type = 'run' as const;
 
   constructor(
     public run: CIPERun,
     public cipeId: string,
+    public runGroup: CIPERunGroup,
   ) {
     super(run.command);
 
@@ -220,6 +240,7 @@ class RunTreeItem extends BaseRecentCIPETreeItem {
       : TreeItemCollapsibleState.None;
     this.id = `${cipeId}-${run.linkId ?? run.executionId}`;
     this.setIcon();
+
     this.contextValue = 'run';
   }
 
@@ -246,33 +267,78 @@ class RunTreeItem extends BaseRecentCIPETreeItem {
     }
   }
 
-  override getChildren(): ProviderResult<FailedTaskTreeItem[]> {
-    if (this.run.failedTasks && this.run.failedTasks.length > 0) {
-      return this.run.failedTasks.map((taskId) => {
-        return new FailedTaskTreeItem(
-          taskId,
-          this.run.linkId,
-          this.run.executionId,
-        );
-      });
+  override getChildren(): ProviderResult<BaseRecentCIPETreeItem[]> {
+    const children: BaseRecentCIPETreeItem[] = [];
+
+    const fix = this.runGroup.aiFix;
+    const primaryFixTaskId = fix?.taskIds[0]; // The first task ID is the primary one
+    const failedTasks = this.run.failedTasks ?? [];
+
+    // Check if this is the first run in the runGroup that has the fix task
+    let isFirstRunWithFixTask = false;
+    if (primaryFixTaskId && failedTasks.includes(primaryFixTaskId)) {
+      // Find the first run that contains this task ID
+      const firstRunWithTask = this.runGroup.runs.find((run) =>
+        run.failedTasks?.includes(primaryFixTaskId),
+      );
+      // Only show the fix if this is the first run with the task
+      isFirstRunWithFixTask =
+        firstRunWithTask &&
+        (firstRunWithTask.linkId === this.run.linkId ||
+          firstRunWithTask.executionId === this.run.executionId);
     }
 
-    return [];
+    for (const taskId of failedTasks) {
+      const taskItem = new FailedTaskTreeItem(
+        taskId,
+        this.run.linkId,
+        this.run.executionId,
+        this.run,
+        this.cipeId,
+      );
+
+      // Only add the fix to the first run that contains this task
+      if (
+        isFirstRunWithFixTask &&
+        taskId === primaryFixTaskId &&
+        this.runGroup.aiFix?.suggestedFixStatus !== 'NOT_STARTED'
+      ) {
+        taskItem.collapsibleState = TreeItemCollapsibleState.Expanded;
+        taskItem.getChildren = () => [
+          new NxCloudFixTreeItem(this.runGroup, this.cipeId, taskId),
+        ];
+      }
+
+      children.push(taskItem);
+    }
+
+    // Adjust collapsible state based on children having tasks
+    this.collapsibleState =
+      failedTasks.length > 0
+        ? TreeItemCollapsibleState.Expanded
+        : TreeItemCollapsibleState.None;
+
+    return children;
   }
 }
 
-class FailedTaskTreeItem extends BaseRecentCIPETreeItem {
+export class FailedTaskTreeItem
+  extends BaseRecentCIPETreeItem
+  implements FailedTaskTreeItemInterface
+{
   type = 'failedTask' as const;
 
   constructor(
     public taskId: string,
     public linkId?: string,
     public executionId?: string,
+    public run?: CIPERun,
+    public cipeId?: string,
   ) {
     super(taskId);
     this.collapsibleState = TreeItemCollapsibleState.None;
-    this.iconPath = new ThemeIcon('error');
     this.contextValue = 'failedTask';
+    this.iconPath = new ThemeIcon('error');
   }
 
   override getChildren(): ProviderResult<BaseRecentCIPETreeItem[]> {
@@ -294,11 +360,34 @@ class LabelTreeItem extends BaseRecentCIPETreeItem {
   }
 }
 
+class ConnectionErrorTreeItem extends BaseRecentCIPETreeItem {
+  type = 'connectionError' as const;
+
+  constructor() {
+    super('Unable to connect to Nx Cloud');
+    this.description = 'Check your connection';
+    this.collapsibleState = TreeItemCollapsibleState.None;
+    this.contextValue = 'connectionError';
+    this.iconPath = new ThemeIcon(
+      'warning',
+      new ThemeColor('list.warningForeground'),
+    );
+    this.tooltip =
+      'Could not connect to Nx Cloud API. Some features may be limited.';
+  }
+
+  override getChildren(): ProviderResult<BaseRecentCIPETreeItem[]> {
+    return [];
+  }
+}
+
 export class CloudRecentCIPEProvider extends AbstractTreeProvider<BaseRecentCIPETreeItem> {
-  private recentCIPEInfo: CIPEInfo[] | undefined;
+  public recentCIPEInfo: CIPEInfo[] | undefined;
   private workspaceUrl: string | undefined;
+  private claimCheckFailed = false;
 
   private cipeElements?: CIPETreeItem[];
+  private static treeView: TreeView<BaseRecentCIPETreeItem> | undefined;
 
   constructor(
     actor: ActorRef<any, EventObject>,
@@ -309,13 +398,18 @@ export class CloudRecentCIPEProvider extends AbstractTreeProvider<BaseRecentCIPE
     actor.subscribe((state) => {
       this.workspaceUrl = state.context.workspaceUrl;
       const updatedCIPEs = state.context.recentCIPEs;
+      const updatedClaimCheckFailed =
+        state.context.onboardingInfo?.isWorkspaceClaimed === undefined;
 
       if (
         (updatedCIPEs || this.recentCIPEInfo) &&
-        !isDeepStrictEqual(this.recentCIPEInfo, updatedCIPEs)
+        (!isDeepStrictEqual(this.recentCIPEInfo, updatedCIPEs) ||
+          updatedClaimCheckFailed !== this.claimCheckFailed)
       ) {
         this.recentCIPEInfo = updatedCIPEs;
+        this.claimCheckFailed = updatedClaimCheckFailed;
         this.refresh();
+        CloudRecentCIPEProvider.updateTreeViewBadge(updatedCIPEs);
       }
     });
   }
@@ -336,15 +430,56 @@ export class CloudRecentCIPEProvider extends AbstractTreeProvider<BaseRecentCIPE
         .sort((a, b) => {
           return b.cipe.createdAt - a.cipe.createdAt;
         });
+
+      // Only show connection error if we have CIPEs to display
+      if (this.claimCheckFailed && this.cipeElements.length > 0) {
+        const items: BaseRecentCIPETreeItem[] = [];
+        items.push(new ConnectionErrorTreeItem());
+        items.push(...this.cipeElements);
+        return items;
+      }
+
       return this.cipeElements;
     }
 
     return element.getChildren();
   }
   override getParent(
-    element: BaseRecentCIPETreeItem,
+    _: BaseRecentCIPETreeItem,
   ): ProviderResult<BaseRecentCIPETreeItem | null | undefined> {
     return undefined;
+  }
+
+  static updateTreeViewBadge(cipeData: CIPEInfo[] | null) {
+    if (!CloudRecentCIPEProvider.treeView) {
+      return;
+    }
+
+    // Count AI fixes that haven't been acted upon
+    let aiFixCount = 0;
+    if (cipeData) {
+      for (const cipe of cipeData) {
+        for (const runGroup of cipe.runGroups || []) {
+          if (
+            runGroup.aiFix?.suggestedFix &&
+            runGroup.aiFix.userAction === 'NONE'
+          ) {
+            aiFixCount++;
+          }
+        }
+      }
+    }
+
+    CloudRecentCIPEProvider.treeView.badge =
+      aiFixCount > 0
+        ? {
+            value: aiFixCount,
+            tooltip:
+              aiFixCount === 1
+                ? '1 AI fix available'
+                : `${aiFixCount} AI fixes available`,
+          }
+        : undefined;
   }
 
   static create(
@@ -357,11 +492,17 @@ export class CloudRecentCIPEProvider extends AbstractTreeProvider<BaseRecentCIPE
       fileDecorationProvider,
     );
 
+    // Store tree view reference for badge updates
+    CloudRecentCIPEProvider.treeView = window.createTreeView(
+      'nxCloudRecentCIPE',
+      {
+        treeDataProvider: recentCIPEProvider,
+      },
+    );
+
     extensionContext.subscriptions.push(
       window.registerFileDecorationProvider(fileDecorationProvider),
-      window.createTreeView('nxCloudRecentCIPE', {
-        treeDataProvider: recentCIPEProvider,
-      }),
+      CloudRecentCIPEProvider.treeView,
       commands.registerCommand(
         'nxCloud.showCIPEInApp',
         async (treeItem: BaseRecentCIPETreeItem) => {
@@ -451,26 +592,9 @@ export class CloudRecentCIPEProvider extends AbstractTreeProvider<BaseRecentCIPE
       commands.registerCommand('nxCloud.helpMeFixCipeError', async () => {
         getTelemetry().logUsage('cloud.fix-cipe-error');
 
-        async function insertPrompt() {
-          const fixMePrompt = 'help me fix the latest ci pipeline error';
-          await new Promise((resolve) => setTimeout(resolve, 150));
-          const originalClipboard = await env.clipboard.readText();
-          await env.clipboard.writeText(fixMePrompt);
-          await commands.executeCommand('editor.action.clipboardPasteAction');
-          await env.clipboard.writeText(originalClipboard);
-        }
+        const fixMePrompt = 'help me fix the latest ci pipeline error';
 
-        if (isInCursor()) {
-          commands.executeCommand('composer.newAgentChat');
-          await insertPrompt();
-        } else {
-          commands.executeCommand('workbench.action.chat.open');
-          commands.executeCommand('workbench.action.chat.toggleAgentMode', {
-            mode: 'agent',
-          });
-          await insertPrompt();
-          await commands.executeCommand('workbench.action.chat.sendToNewChat');
-        }
+        sendMessageToAgent(fixMePrompt);
       }),
     );
   }

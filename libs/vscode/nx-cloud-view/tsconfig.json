@@ -10,13 +10,13 @@
       "path": "../lsp-client"
     },
     {
-      "path": "../nx-workspace"
+      "path": "../utils"
     },
     {
       "path": "../output-channels"
     },
     {
-      "path": "../utils"
+      "path": "../nx-workspace"
     },
     {
       "path": "../../shared/nx-cloud"

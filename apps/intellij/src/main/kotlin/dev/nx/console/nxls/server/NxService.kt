@@ -41,6 +41,11 @@ interface NxService {
     }
 
     @JsonRequest
+    fun transformedGeneratorSchema(schema: GeneratorSchema): CompletableFuture<GeneratorSchema> {
+        throw UnsupportedOperationException()
+    }
+
+    @JsonRequest
     fun generatorContextV2(
         generatorContextFromPathRequest: NxGetGeneratorContextFromPathRequest
     ): CompletableFuture<NxGeneratorContext> {
@@ -77,11 +82,6 @@ interface NxService {
     }
 
     @JsonRequest
-    fun transformedGeneratorSchema(schema: GeneratorSchema): CompletableFuture<GeneratorSchema> {
-        throw UnsupportedOperationException()
-    }
-
-    @JsonRequest
     fun startupMessage(
         schema: GeneratorSchema
     ): CompletableFuture<GenerateUiStartupMessageDefinition> {
@@ -89,7 +89,7 @@ interface NxService {
     }
 
     @JsonRequest
-    fun version(): CompletableFuture<NxVersion> {
+    fun version(request: NxVersionRequest): CompletableFuture<NxVersion> {
         throw UnsupportedOperationException()
     }
 
@@ -132,6 +132,23 @@ interface NxService {
 
     @JsonRequest
     fun parseTargetString(targetString: String): CompletableFuture<TargetInfo> {
+        throw UnsupportedOperationException()
+    }
+
+    @JsonRequest
+    fun recentCIPEData(): CompletableFuture<CIPEDataResponse> {
+        throw UnsupportedOperationException()
+    }
+
+    @JsonRequest
+    fun cloudAuthHeaders(): CompletableFuture<NxCloudAuthHeaders> {
+        throw UnsupportedOperationException()
+    }
+
+    @JsonRequest
+    fun downloadAndExtractArtifact(
+        request: NxDownloadAndExtractArtifactRequest
+    ): CompletableFuture<NxDownloadAndExtractArtifactResponse> {
         throw UnsupportedOperationException()
     }
 }

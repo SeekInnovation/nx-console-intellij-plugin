@@ -20,6 +20,7 @@ val NxTreeNodeKey = DataKey.create<NxSimpleNode?>("NX_TREE_NODE")
 val NxTreeNodeProjectKey = DataKey.create<NxProject?>("NX_TREE_NODE_PROJECT")
 
 class NxProjectsTree(project: Project) : SimpleTree(), DataProvider {
+
     init {
         isRootVisible = false
         showsRootHandles = true
@@ -40,7 +41,7 @@ class NxProjectsTree(project: Project) : SimpleTree(), DataProvider {
         return null
     }
 
-    class AtomizerTreeCellRenderer(private val project: Project) : ColoredTreeCellRenderer() {
+    class AtomizerTreeCellRenderer(project: Project) : ColoredTreeCellRenderer() {
         private val nxCloudSyncService = NxCloudStatusSyncAccessService.getInstance(project)
 
         override fun customizeCellRenderer(
@@ -50,9 +51,9 @@ class NxProjectsTree(project: Project) : SimpleTree(), DataProvider {
             expanded: Boolean,
             leaf: Boolean,
             row: Int,
-            hasFocus: Boolean
+            hasFocus: Boolean,
         ) {
-            val node = TreeUtil.getUserObject(value) as NxSimpleNode
+            val node = TreeUtil.getUserObject(value) as? NxSimpleNode ?: return
 
             icon = node.icon
             append(node.name, SimpleTextAttributes.REGULAR_ATTRIBUTES, true)
@@ -64,9 +65,9 @@ class NxProjectsTree(project: Project) : SimpleTree(), DataProvider {
                     SimpleTextAttributes(
                         STYLE_SMALLER,
                         if (isConnected) NamedColorUtil.getInactiveTextColor()
-                        else UIManager.getColor("Tree.errorForeground")
+                        else UIManager.getColor("Tree.errorForeground"),
                     ),
-                    false
+                    false,
                 )
                 toolTipText =
                     "Nx automatically split the potentially slow ${node.nonAtomizedTarget} task into separate tasks for each file. Enable ${if(isConnected) "Nx Agents" else "Nx Cloud"} to benefit from task distribution and flaky task re-runs."

@@ -118,8 +118,11 @@ export const NxGeneratorContextV2Request: RequestType<
   unknown
 > = new RequestType('nx/generatorContextV2');
 
-export const NxVersionRequest: RequestType<undefined, NxVersion, unknown> =
-  new RequestType('nx/version');
+export const NxVersionRequest: RequestType<
+  { reset: boolean },
+  NxVersion,
+  unknown
+> = new RequestType('nx/version');
 
 export const NxProjectGraphOutputRequest: RequestType<
   undefined,
@@ -215,3 +218,19 @@ export const NxCloudTerminalOutputRequest: RequestType<
   { terminalOutput?: string; error?: string },
   unknown
 > = new RequestType('nx/cloudTerminalOutput');
+
+export const NxCloudAuthHeadersRequest: RequestType<
+  undefined,
+  {
+    'Nx-Cloud-Id'?: string;
+    'Nx-Cloud-Personal-Access-Token'?: string;
+    Authorization?: string;
+  },
+  unknown
+> = new RequestType('nx/cloudAuthHeaders');
+
+export const NxDownloadAndExtractArtifactRequest: RequestType<
+  { artifactUrl: string },
+  { content?: string; error?: string },
+  unknown
+> = new RequestType('nx/downloadAndExtractArtifact');

@@ -33,24 +33,5 @@
     "jsx": "react",
     "jsxFactory": "vscpp",
     "jsxFragmentFactory": "vscppf"
-    // "sourceMap": true,
-    // "importHelpers": true,
-    // "moduleResolution": "node",
-    // "emitDecoratorMetadata": true,
-    // "experimentalDecorators": true,
-    // "target": "ES2022",
-    // "skipLibCheck": true,
-    // "strictNullChecks": true,
-    // "allowUnreachableCode": false,
-    // "allowUnusedLabels": true,
-    // "noImplicitAny": true,
-    // "noImplicitThis": true,
-    // "strictFunctionTypes": true,
-    // "downlevelIteration": true,
-    // "lib": ["es2019", "dom", "esnext.asynciterable"],
-    // "types": ["node", "jest"],
-    // "module": "commonjs",
-    // "baseUrl": ".",
-    // "rootDir": "."
   }
 }

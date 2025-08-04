@@ -4,9 +4,6 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import dev.nx.console.utils.isDevelopmentInstance
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.logging.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -28,19 +25,7 @@ class TelemetryService(private val cs: CoroutineScope) {
         if (isDevelopmentInstance) {
             LoggerTelemetryService()
         } else {
-            MeasurementProtocolService(
-                HttpClient(CIO) {
-                    install(Logging) {
-                        level = LogLevel.ALL
-                        logger =
-                            object : Logger {
-                                override fun log(message: String) {
-                                    this@TelemetryService.logger.trace(message)
-                                }
-                            }
-                    }
-                }
-            )
+            MeasurementProtocolService()
         }
 
     fun featureUsed(feature: TelemetryEvent, data: Map<String, Any>? = null) {
@@ -55,5 +40,20 @@ class TelemetryService(private val cs: CoroutineScope) {
             return
         }
         cs.launch { service.featureUsed(feature.eventName, data) }
+    }
+
+    // String-based method for compatibility with VSCode telemetry patterns
+    fun featureUsed(feature: String, data: Map<String, Any>? = null) {
+        val source = data?.get("source")
+        if (
+            source != null &&
+                source is String &&
+                !TelemetryEventSource.isValidSource(source) &&
+                isDevelopmentInstance
+        ) {
+            logger.error("Invalid telemetry source: $source")
+            return
+        }
+        cs.launch { service.featureUsed(feature, data) }
     }
 }

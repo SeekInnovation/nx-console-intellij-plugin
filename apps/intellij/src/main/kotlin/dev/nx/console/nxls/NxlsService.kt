@@ -114,6 +114,13 @@ class NxlsService(private val project: Project, private val cs: CoroutineScope) 
             ?: emptyList()
     }
 
+    suspend fun transformedGeneratorSchema(generatorSchema: GeneratorSchema): GeneratorSchema {
+        return withMessageIssueCatch("nx/transformedGeneratorSchema") {
+            server()?.getNxService()?.transformedGeneratorSchema(generatorSchema)?.await()
+        }()
+            ?: generatorSchema
+    }
+
     suspend fun generatorContextFromPath(
         generator: NxGenerator? = null,
         path: String?,
@@ -165,22 +172,15 @@ class NxlsService(private val project: Project, private val cs: CoroutineScope) 
         }()
     }
 
-    suspend fun transformedGeneratorSchema(schema: GeneratorSchema): GeneratorSchema {
-        return withMessageIssueCatch("nx/transformedGeneratorSchema") {
-            server()?.getNxService()?.transformedGeneratorSchema(schema)?.await()
-        }()
-            ?: schema
-    }
-
     suspend fun startupMessage(schema: GeneratorSchema): GenerateUiStartupMessageDefinition? {
         return withMessageIssueCatch("nx/startupMessage") {
             server()?.getNxService()?.startupMessage(schema)?.await()
         }()
     }
 
-    suspend fun nxVersion(): NxVersion? {
+    suspend fun nxVersion(reset: Boolean = false): NxVersion? {
         return withMessageIssueCatch("nx/version") {
-            server()?.getNxService()?.version()?.await()
+            server()?.getNxService()?.version(NxVersionRequest(reset))?.await()
         }()
     }
 
@@ -246,6 +246,28 @@ class NxlsService(private val project: Project, private val cs: CoroutineScope) 
 
     suspend fun awaitStarted() {
         wrapper.awaitStarted().await()
+    }
+
+    suspend fun recentCIPEData(): CIPEDataResponse? {
+        return withMessageIssueCatch("nx/recentCIPEData") {
+            server()?.getNxService()?.recentCIPEData()?.await()
+        }()
+    }
+
+    suspend fun cloudAuthHeaders(): NxCloudAuthHeaders? {
+        return withMessageIssueCatch("nx/cloudAuthHeaders") {
+            val result = server()?.getNxService()?.cloudAuthHeaders()?.await()
+            result
+        }()
+    }
+
+    suspend fun downloadAndExtractArtifact(
+        artifactUrl: String
+    ): NxDownloadAndExtractArtifactResponse? {
+        return withMessageIssueCatch("nx/downloadAndExtractArtifact") {
+            val request = NxDownloadAndExtractArtifactRequest(artifactUrl = artifactUrl)
+            server()?.getNxService()?.downloadAndExtractArtifact(request)?.await()
+        }()
     }
 
     private fun <T> withMessageIssueCatch(

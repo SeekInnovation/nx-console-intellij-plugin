@@ -25,7 +25,11 @@ import { join } from 'path';
 import { isDeepStrictEqual } from 'util';
 import { ActorRef, EventObject } from 'xstate';
 import { createNxCloudOnboardingURL } from './get-cloud-onboarding-url';
-import { getNxAccessToken, getNxCloudUrl } from '@nx-console/shared-nx-cloud';
+import {
+  getNxAccessToken,
+  getNxCloudId,
+  getNxCloudUrl,
+} from '@nx-console/shared-nx-cloud';
 
 export class CloudOnboardingViewProvider implements WebviewViewProvider {
   public static viewId = 'nxCloudOnboarding';
@@ -51,8 +55,8 @@ export class CloudOnboardingViewProvider implements WebviewViewProvider {
 
   async resolveWebviewView(
     webviewView: WebviewView,
-    context: WebviewViewResolveContext,
-    token: CancellationToken,
+    _context: WebviewViewResolveContext,
+    _token: CancellationToken,
   ): Promise<void> {
     this.ensureStateSubscription();
 
@@ -109,14 +113,6 @@ export class CloudOnboardingViewProvider implements WebviewViewProvider {
         generateCI();
         break;
       }
-      case 'show-affected-docs': {
-        getTelemetry().logUsage('cloud.show-affected-docs');
-        commands.executeCommand(
-          'vscode.open',
-          Uri.parse('https://nx.dev/ci/features/affected?utm_source=nxconsole'),
-        );
-        break;
-      }
       case 'open-cloud-app': {
         commands.executeCommand('nxCloud.openApp');
         break;
@@ -137,7 +133,8 @@ export class CloudOnboardingViewProvider implements WebviewViewProvider {
 
     const codiconsUri = webviewView.webview.asWebviewUri(
       Uri.joinPath(
-        this._webviewSourceUri,
+        this.extensionContext.extensionUri,
+        'node_modules',
         '@vscode',
         'codicons',
         'dist',
@@ -161,7 +158,7 @@ export class CloudOnboardingViewProvider implements WebviewViewProvider {
 			<head>
 
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="${codiconsUri}" rel="stylesheet">
+        <link href="${codiconsUri}" rel="stylesheet" id="vscode-codicon-stylesheet">
 
 				<title>Nx Cloud Onboarding</title>
          <script
@@ -223,6 +220,7 @@ async function finishCloudSetup() {
   const workspacePath = getNxWorkspacePath();
 
   const accessToken = await getNxAccessToken(workspacePath);
+  const nxCloudId = await getNxCloudId(workspacePath);
 
   const nxCloudUrl = await getNxCloudUrl(workspacePath);
 
@@ -246,10 +244,10 @@ async function finishCloudSetup() {
     if (nxPackage && nxPackage.createNxCloudOnboardingURL) {
       url = await nxPackage.createNxCloudOnboardingURL(
         'nx-console',
-        accessToken,
+        accessToken || nxCloudId,
       );
     } else {
-      url = await createNxCloudOnboardingURL(accessToken);
+      url = await createNxCloudOnboardingURL(accessToken || nxCloudId);
     }
   }, 5000);
 

@@ -15,11 +15,11 @@ plugins {
     // Java support
     id("java")
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "2.0.20"
+    id("org.jetbrains.kotlin.jvm") version "2.0.21"
     // Kotlin serialization
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.20"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21"
     // Gradle IntelliJ Platform Plugin
-    id("org.jetbrains.intellij.platform") version "2.3.0"
+    id("org.jetbrains.intellij.platform") version "2.6.0"
 
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.0.0"
@@ -43,23 +43,19 @@ repositories {
 }
 
 allprojects {
-  apply {
-    plugin("project-report")
-    plugin("org.jetbrains.kotlin.jvm")
-    plugin("com.ncorti.ktfmt.gradle")
-  }
+    apply {
+        plugin("project-report")
+        plugin("org.jetbrains.kotlin.jvm")
+        plugin("com.ncorti.ktfmt.gradle")
+    }
 }
 
 tasks.register("projectReportAll") {
-  // All project reports of subprojects
-  allprojects.forEach {
-    dependsOn(it.tasks.get("projectReport"))
-  }
+    // All project reports of subprojects
+    allprojects.forEach { dependsOn(it.tasks.get("projectReport")) }
 
-  // All projectReportAll of included builds
-  gradle.includedBuilds.forEach {
-    dependsOn(it.task(":projectReportAll"))
-  }
+    // All projectReportAll of included builds
+    gradle.includedBuilds.forEach { dependsOn(it.task(":projectReportAll")) }
 }
 
 configurations.all {
@@ -73,14 +69,6 @@ configurations.all {
 
 dependencies {
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:0.23.1")
-
-    val ktorVersion = "2.3.12"
-    implementation("io.ktor:ktor-client-core:$ktorVersion")
-    implementation("io.ktor:ktor-client-cio:$ktorVersion")
-    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-    implementation("io.ktor:ktor-client-logging:$ktorVersion")
-
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.2")
 
     implementation("io.github.z4kn4fein:semver:2.0.0")
@@ -88,9 +76,14 @@ dependencies {
     implementation("io.github.nsk90:kstatemachine:0.31.0")
     implementation("io.github.nsk90:kstatemachine-coroutines:0.31.0")
 
+    // Add Kotlin test dependency
+    testImplementation(kotlin("test"))
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("junit:junit:4.13.2")
+
     intellijPlatform {
         intellijIdeaUltimate(providers.gradleProperty("platformVersion"))
-
+        plugin("com.intellij.ml.llm:251.26094.80.13")
         bundledPlugins(
             providers.gradleProperty("platformPlugins").map { plugins ->
                 plugins.split(',').map(String::trim).filter(String::isNotEmpty)
@@ -98,7 +91,8 @@ dependencies {
         )
         pluginVerifier()
         zipSigner()
-        instrumentationTools()
+        // Add test framework configuration
+        testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
     }
     implementation(project(":libs:intellij:models"))
 }
@@ -110,11 +104,11 @@ kotlin { jvmToolchain(21) }
 intellijPlatform {
     projectName = providers.gradleProperty("pluginName").get()
 
+
     pluginConfiguration {
         version = providers.gradleProperty("version").get()
         ideaVersion {
             sinceBuild = providers.gradleProperty("pluginSinceBuild").get()
-            untilBuild = providers.gradleProperty("pluginUntilBuild").get()
         }
         description =
             providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
@@ -170,7 +164,7 @@ intellijPlatform {
 intellijPlatformTesting {
     runIde {
         create("runIntelliJLatest") {
-            version = "251.23536.34"
+            version = "252.18003.27"
             prepareSandboxTask {
                 from(nxlsRoot) {
                     include("**")
@@ -205,7 +199,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 }
 
 tasks {
-    runInspections { mount("${rootDir}/../../gradle.properties", "/data/project/gradle.properties") }
+    runInspections {
+        mount("${rootDir}/../../gradle.properties", "/data/project/gradle.properties")
+    }
 
     prepareSandbox() {
         from(nxlsRoot) {
@@ -216,19 +212,38 @@ tasks {
     }
 
     jar {
-        dependsOn("copyGenerateUiV2Artifacts")
+        dependsOn("copyGenerateUiV2Artifacts", "copyCloudFixWebviewArtifacts")
         archiveBaseName.set("nx-console")
     }
 
-    instrumentedJar { dependsOn("copyGenerateUiV2Artifacts") }
+    instrumentedJar { dependsOn("copyGenerateUiV2Artifacts", "copyCloudFixWebviewArtifacts") }
 
     withType<RunIdeTask> { maxHeapSize = "6g" }
+
+    test {
+        useJUnit()
+        include("**/*Test.class")
+
+        testLogging {
+            events("passed", "skipped", "failed", "standardOut", "standardError")
+            showExceptions = true
+            showStackTraces = true
+            showCauses = true
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        }
+    }
 }
 
 tasks.register<Copy>("copyGenerateUiV2Artifacts") {
     from("${rootDir}/../../dist/apps/generate-ui-v2")
     include("*.js", "*.css")
     into(layout.buildDirectory.file("resources/main/generate_ui_v2"))
+}
+
+tasks.register<Copy>("copyCloudFixWebviewArtifacts") {
+    from("${rootDir}/../../dist/libs/shared/cloud-fix-webview")
+    include("*.js", "*.css", "*.html", "assets/**")
+    into(layout.buildDirectory.file("resources/main/cloud_fix_webview"))
 }
 
 tasks.register<DefaultTask>("publish") {

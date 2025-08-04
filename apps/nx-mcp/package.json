@@ -1,6 +1,6 @@
 {
   "name": "nx-mcp",
-  "version": "0.0.8",
+  "version": "0.4.1",
   "main": "main.js",
   "description": "A Model Context Protocol server implementation for Nx",
   "author": {
@@ -83,6 +83,12 @@
         "options": {
           "cwd": "apps/nx-mcp"
         },
+        "dependsOn": [
+          "build"
+        ]
+      },
+      "serve": {
+        "command": "npx @modelcontextprotocol/inspector@latest node dist/apps/nx-mcp/main.js",
         "dependsOn": [
           "build"
         ]

@@ -1,5 +1,27 @@
-package dev.nx.console.angular
-
+//package dev.nx.console.angular
+//
+//import com.intellij.openapi.application.EDT
+//import com.intellij.openapi.components.*
+//import com.intellij.openapi.project.Project
+//import com.intellij.openapi.project.RootsChangeRescanningInfo
+//import com.intellij.openapi.roots.ex.ProjectRootManagerEx
+//import com.intellij.openapi.util.EmptyRunnable
+//import com.intellij.openapi.vfs.VirtualFile
+//import com.intellij.openapi.vfs.VirtualFileManager
+//import com.intellij.util.xmlb.annotations.Attribute
+//import com.intellij.util.xmlb.annotations.XMap
+//import dev.nx.console.nxls.NxWorkspaceRefreshListener
+//import dev.nx.console.nxls.NxlsService
+//import dev.nx.console.nxls.NxlsService.Companion.NX_WORKSPACE_REFRESH_TOPIC
+//import dev.nx.console.utils.writeAction
+//import java.nio.file.Path
+//import kotlinx.coroutines.CoroutineScope
+//import kotlinx.coroutines.Dispatchers
+//import kotlinx.coroutines.launch
+//import kotlinx.coroutines.withContext
+//import org.angular2.cli.config.AngularConfig
+//import org.angular2.cli.config.AngularConfigProvider
+//
 //@Service(Service.Level.PROJECT)
 //@State(name = "NxAngularConfigService", storages = [Storage("nx-angular-config.xml")])
 //class NxAngularConfigService(private val project: Project, private val cs: CoroutineScope) :
@@ -54,7 +76,8 @@ package dev.nx.console.angular
 //            return
 //        }
 //        val projectFiles =
-//            workspace.projectGraph.nodes.values
+//            (workspace.projectGraph?.nodes ?: return)
+//                .values
 //                .asSequence()
 //                // TODO: use framework metadata in the future, for now just register all projects
 //                //                .filter { project ->
@@ -97,7 +120,7 @@ package dev.nx.console.angular
 //        var projects: MutableMap<String, String> = mutableMapOf()
 //    }
 //}
-
+//
 //internal class NxAngularConfigProvider : AngularConfigProvider {
 //
 //    override fun findAngularConfig(project: Project, context: VirtualFile): AngularConfig? =

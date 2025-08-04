@@ -5,9 +5,7 @@ import {
   ExtensionContext,
   ProgressLocation,
   RelativePattern,
-  Uri,
   commands,
-  extensions,
   tasks,
   window,
   workspace,
@@ -25,13 +23,11 @@ import {
 } from '@nx-console/vscode-nx-project-view';
 import { CliTaskProvider, initTasks } from '@nx-console/vscode-tasks';
 import {
-  GitExtension,
   vscodeLogger,
   watchCodeLensConfigChange,
   watchFile,
 } from '@nx-console/vscode-utils';
 
-import { initMcp, updateMcpServerWorkspacePath } from '@nx-console/mcp';
 import { fileExists } from '@nx-console/shared-file-system';
 import {
   AddDependencyCodelensProvider,
@@ -44,6 +40,13 @@ import {
   getNxlsClient,
   showRefreshLoadingAtLocation,
 } from '@nx-console/vscode-lsp-client';
+import {
+  initMcp,
+  startMcpServer,
+  stopMcpServer,
+  updateMcpServerWorkspacePath,
+} from '@nx-console/vscode-mcp';
+import { initMigrate } from '@nx-console/vscode-migrate';
 import { initNxConfigDecoration } from '@nx-console/vscode-nx-config-decoration';
 import { initNxConversion } from '@nx-console/vscode-nx-conversion';
 import { initHelpAndFeedbackView } from '@nx-console/vscode-nx-help-and-feedback-view';
@@ -56,6 +59,11 @@ import {
 } from '@nx-console/language-server-types';
 import { checkIsNxWorkspace } from '@nx-console/shared-npm';
 import { initErrorDiagnostics } from '@nx-console/vscode-error-diagnostics';
+import {
+  getNxGraphServer,
+  hasNxGraphServer,
+  hasNxGraphServerAffected,
+} from '@nx-console/vscode-graph-base';
 import { initNvmTip } from '@nx-console/vscode-nvm-tip';
 import { initNxCloudView } from '@nx-console/vscode-nx-cloud-view';
 import {
@@ -67,11 +75,7 @@ import { getTelemetry, initTelemetry } from '@nx-console/vscode-telemetry';
 import { RequestType } from 'vscode-languageserver';
 import { initNxInit } from './nx-init';
 import { registerRefreshWorkspace } from './refresh-workspace';
-import {
-  hasNxGraphServerAffected,
-  hasNxGraphServer,
-  getNxGraphServer,
-} from '@nx-console/vscode-graph-base';
+import { initMessagingServer } from '@nx-console/vscode-messaging';
 
 let nxProjectsTreeProvider: NxProjectTreeProvider;
 
@@ -86,6 +90,9 @@ export async function activate(c: ExtensionContext) {
   try {
     vscodeLogger.log(`Activating Nx Console (pid ${process.pid})`);
     const startTime = Date.now();
+
+    startMcpServer();
+
     context = c;
 
     GlobalConfigurationStore.fromContext(context);
@@ -144,6 +151,8 @@ export async function activate(c: ExtensionContext) {
 }
 
 export async function deactivate() {
+  stopMcpServer();
+
   if (hasNxGraphServer()) {
     getNxGraphServer(context).dispose();
   }
@@ -188,7 +197,7 @@ function manuallySelectWorkspaceDefinition() {
         canSelectMany: false,
         openLabel: 'Select workspace directory',
       })
-      .then((value) => {
+      .then(async (value) => {
         if (value && value[0]) {
           const selectedDirectory = value[0].fsPath;
           const workspaceRoot =
@@ -201,7 +210,7 @@ function manuallySelectWorkspaceDefinition() {
             'nxWorkspacePath',
             selectedDirectoryRelativePath,
           );
-          updateMcpServerWorkspacePath(selectedDirectory);
+          await updateMcpServerWorkspacePath(selectedDirectory);
           setWorkspace(selectedDirectory);
         }
       });
@@ -289,6 +298,7 @@ async function setWorkspace(workspacePath: string) {
 
     initNxCommandsView(context);
     initNxCloudView(context);
+    initMigrate(context);
     initNvmTip(context);
     initVscodeProjectDetails(context);
     initVscodeProjectGraph(context);
@@ -317,6 +327,7 @@ async function setWorkspace(workspacePath: string) {
   commands.executeCommand('setContext', 'isNxWorkspace', isNxWorkspace);
 
   initNxConversion(context, isAngularWorkspace, isNxWorkspace);
+  await initMessagingServer(context, workspacePath);
 }
 
 async function registerWorkspaceFileWatcher(

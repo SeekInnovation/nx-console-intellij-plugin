@@ -1,5 +1,4 @@
 import { gte } from '@nx-console/nx-version';
-import { clearJsonCache } from '@nx-console/shared-file-system';
 import {
   importWorkspaceDependency,
   workspaceDependencyPath,
@@ -176,11 +175,13 @@ async function enableTypescriptServerPlugin(
   const isTsSolutionSetup = await isUsingTsSolutionSetup(workspaceRoot);
   let projectGraph: ProjectGraph | undefined;
   if (isTsSolutionSetup) {
-    ({ projectGraph } = await getNxWorkspace());
+    const nxWorkspace = await getNxWorkspace();
+    projectGraph = nxWorkspace?.projectGraph;
 
     disposables.push(
       onWorkspaceRefreshed(async () => {
-        ({ projectGraph } = await getNxWorkspace());
+        const nxWorkspace = await getNxWorkspace();
+        projectGraph = nxWorkspace?.projectGraph;
         await configurePlugin(
           workspaceRoot,
           projectGraph,
@@ -212,7 +213,6 @@ async function enableTypescriptServerPlugin(
     watchFile(
       `${workspaceRoot}/tsconfig.base.json`,
       () => {
-        clearJsonCache(TSCONFIG_BASE, workspaceRoot);
         configurePlugin(
           workspaceRoot,
           projectGraph,

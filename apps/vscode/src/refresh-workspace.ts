@@ -3,7 +3,7 @@ import { getNxlsClient } from '@nx-console/vscode-lsp-client';
 import { getOutputChannel } from '@nx-console/vscode-output-channels';
 import { getTelemetry } from '@nx-console/vscode-telemetry';
 import { commands, ExtensionContext } from 'vscode';
-import { refreshMcp } from '@nx-console/mcp';
+import { refreshMcp } from '@nx-console/vscode-mcp';
 
 const REFRESH_WORKSPACE = 'nxConsole.refreshWorkspace';
 
@@ -11,7 +11,7 @@ let isRefreshing = false;
 
 export function registerRefreshWorkspace(context: ExtensionContext) {
   context.subscriptions.push(
-    commands.registerCommand(REFRESH_WORKSPACE, async () => {
+    commands.registerCommand(REFRESH_WORKSPACE, async (silent = false) => {
       if (isRefreshing) {
         return;
       }
@@ -21,7 +21,7 @@ export function registerRefreshWorkspace(context: ExtensionContext) {
       getTelemetry().logUsage('misc.refresh-workspace');
 
       try {
-        await getNxlsClient().refreshWorkspace();
+        await getNxlsClient().refreshWorkspace(silent);
         await getNxGraphServer(context).restart();
         refreshMcp();
       } catch (e) {

@@ -1,13 +1,18 @@
+import { checkIsNxWorkspace } from '@nx-console/shared-npm';
 import {
   getNxWorkspacePath,
   WorkspaceConfigurationStore,
 } from '@nx-console/vscode-configuration';
 import { getOutputChannel } from '@nx-console/vscode-output-channels';
+import { getTelemetry } from '@nx-console/vscode-telemetry';
 import {
   ensureEditorDirExists,
   getMcpJsonPath,
   getNxMcpPort,
   hasNxMcpEntry,
+  isInCursor,
+  isInVSCode,
+  isInWindsurf,
   readMcpJson,
   writeMcpJson,
 } from '@nx-console/vscode-utils';
@@ -19,15 +24,28 @@ import {
   window,
   workspace,
 } from 'vscode';
-import { restartMcpServer, tryStartMcpServer } from './mcp-server';
+import { AgentRulesManager } from './agent-rules-manager';
+import { McpWebServer } from './mcp-web-server';
 import { findAvailablePort } from './ports';
-import { getTelemetry } from '@nx-console/vscode-telemetry';
-import { checkIsNxWorkspace } from '@nx-console/shared-npm';
-import { isInCursor } from '@nx-console/vscode-utils';
-const MCP_DONT_ASK_AGAIN_KEY = 'mcpDontAskAgain';
 
 let mcpJsonWatcher: FileSystemWatcher | null = null;
 let hasInitializedMcp = false;
+
+export function startMcpServer() {
+  const port = getNxMcpPort();
+  if (!port) {
+    return;
+  }
+  McpWebServer.Instance.startSkeletonMcpServer(port);
+}
+
+export function stopMcpServer() {
+  McpWebServer.Instance.stopMcpServer();
+}
+
+export async function updateMcpServerWorkspacePath(workspacePath: string) {
+  await McpWebServer.Instance.updateMcpServerWorkspacePath(workspacePath);
+}
 
 export async function initMcp(context: ExtensionContext) {
   if (hasInitializedMcp) {
@@ -35,25 +53,37 @@ export async function initMcp(context: ExtensionContext) {
   }
 
   commands.executeCommand('setContext', 'isInCursor', isInCursor());
+  commands.executeCommand('setContext', 'isInWindsurf', isInWindsurf());
+  commands.executeCommand('setContext', 'isInVSCode', isInVSCode());
 
-  if (!(await checkIsNxWorkspace(getNxWorkspacePath()))) {
+  if (!(await checkIsNxWorkspace(getNxWorkspacePath(), false))) {
     return;
   }
   hasInitializedMcp = true;
 
   commands.executeCommand('setContext', 'hasNxMcpConfigured', hasNxMcpEntry());
 
-  await tryStartMcpServer(getNxWorkspacePath());
+  McpWebServer.Instance.completeMcpServerSetup();
 
-  showMCPNotification();
-
-  setupMcpJsonWatcher(context);
+  const rulesManager = new AgentRulesManager(context);
 
   context.subscriptions.push(
     commands.registerCommand('nx.configureMcpServer', async () => {
       await updateMcpJson();
+      await rulesManager.addAgentRulesToWorkspace();
+    }),
+    commands.registerCommand('nx.addAgentRules', async () => {
+      await rulesManager.addAgentRulesToWorkspace();
     }),
   );
+
+  await rulesManager.initialize();
+
+  setupMcpJsonWatcher(context);
+
+  // Wait a bit before showing notification
+  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await showMCPNotification(rulesManager);
 }
 
 function setupMcpJsonWatcher(context: ExtensionContext) {
@@ -71,7 +101,10 @@ function setupMcpJsonWatcher(context: ExtensionContext) {
     const port = getNxMcpPort();
     if (port !== lastPort) {
       lastPort = port;
-      await restartMcpServer();
+      McpWebServer.Instance.stopMcpServer();
+      if (port) {
+        McpWebServer.Instance.startSkeletonMcpServer(port);
+      }
     }
 
     commands.executeCommand(
@@ -96,10 +129,9 @@ function setupMcpJsonWatcher(context: ExtensionContext) {
   context.subscriptions.push(mcpJsonWatcher);
 }
 
-async function showMCPNotification() {
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+async function showMCPNotification(rulesManager: AgentRulesManager) {
   const dontAskAgain = WorkspaceConfigurationStore.instance.get(
-    MCP_DONT_ASK_AGAIN_KEY,
+    'mcpDontAskAgain',
     false,
   );
 
@@ -107,23 +139,33 @@ async function showMCPNotification() {
     return;
   }
 
+  if (isInWindsurf()) {
+    // TODO: do once windsurf supports project-level mcp servers
+    return;
+  }
+
   if (hasNxMcpEntry()) {
+    // if mcp is already configured but the rules file isn't, prompt for rules setup
+    await rulesManager.showAgentRulesNotification();
     return;
   }
 
   const msg = isInCursor()
-    ? 'Improve Cursor Agents with Nx-specific context?'
-    : 'Improve Copilot Agents with Nx-specific context?';
+    ? 'Improve Cursor Agents with Nx-specific context? (MCP server & rules file)'
+    : isInWindsurf()
+      ? 'Improve Cascade with Nx-specific context? (MCP server & rules file)'
+      : 'Improve Copilot Agents with Nx-specific context? (MCP server & conventions file)';
 
   window
     .showInformationMessage(msg, 'Yes', "Don't ask again")
-    .then((answer) => {
+    .then(async (answer) => {
       if (answer === "Don't ask again") {
-        WorkspaceConfigurationStore.instance.set(MCP_DONT_ASK_AGAIN_KEY, true);
+        WorkspaceConfigurationStore.instance.set('mcpDontAskAgain', true);
       }
 
       if (answer === 'Yes') {
-        updateMcpJson();
+        await updateMcpJson();
+        await rulesManager.addAgentRulesToWorkspace();
       }
     });
 }
@@ -156,7 +198,7 @@ async function updateMcpJson() {
     }
 
     mcpJson.mcpServers['nx-mcp'] = {
-      url: `http://localhost:${port}/sse`,
+      url: `http://localhost:${port}/mcp`,
     };
   } else {
     if (!mcpJson.servers) {
@@ -164,11 +206,10 @@ async function updateMcpJson() {
     }
 
     mcpJson.servers['nx-mcp'] = {
-      type: 'sse',
-      url: `http://localhost:${port}/sse`,
+      type: 'http',
+      url: `http://localhost:${port}/mcp`,
     };
   }
-
   if (!writeMcpJson(mcpJson)) {
     window.showErrorMessage('Failed to write to mcp.json');
     return false;

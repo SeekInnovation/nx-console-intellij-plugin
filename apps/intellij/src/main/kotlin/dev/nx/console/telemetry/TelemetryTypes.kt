@@ -2,6 +2,9 @@ package dev.nx.console.telemetry
 
 import kotlin.reflect.full.companionObject
 
+// these are compared to libs/shared/telemetry/src/lib/telemetry-types.ts
+// through the @nx-console/workspace:telemetry-check target
+// keep them in sync with VSCode!
 enum class TelemetryEvent(val eventName: String) {
     // Activation
     EXTENSION_ACTIVATE("extension-activate"),
@@ -15,12 +18,32 @@ enum class TelemetryEvent(val eventName: String) {
     MISC_OPEN_PROJECT_DETAILS_CODELENS("misc.open-project-details-codelens"),
     MISC_EXCEPTION("misc.exception"),
 
+    // AI
+    AI_ADD_MCP("ai.add-mcp"),
+    AI_CHAT_MESSAGE("ai.chat-message"),
+    AI_FEEDBACK_BAD("ai.feedback-bad"),
+    AI_FEEDBACK_GOOD("ai.feedback-good"),
+    AI_RESPONSE_INTERACTION("ai.response-interaction"),
+    AI_TOOL_CALL("ai.tool-call"),
+
     // Cloud
     CLOUD_CONNECT("cloud.connect"),
     CLOUD_OPEN_APP("cloud.open-app"),
     CLOUD_GENERATE_CI_WORKFLOW("cloud.generate-ci-workflow"),
     CLOUD_FINISH_SETUP("cloud.finish-setup"),
     CLOUD_SHOW_AFFECTED_DOCS("cloud.show-affected-docs"),
+    CLOUD_SHOW_CIPE_NOTIFICATION("cloud.show-cipe-notification"),
+    CLOUD_VIEW_CIPE("cloud.view-cipe"),
+    CLOUD_VIEW_CIPE_COMMIT("cloud.view-cipe-commit"),
+    CLOUD_FIX_CIPE_ERROR("cloud.fix-cipe-error"),
+    CLOUD_APPLY_AI_FIX("cloud.apply-ai-fix"),
+    CLOUD_EXPLAIN_CIPE_ERROR("cloud.explain-cipe-error"),
+    CLOUD_OPEN_FIX_DETAILS("cloud.open-fix-details"),
+    CLOUD_REJECT_AI_FIX("cloud.reject-ai-fix"),
+    CLOUD_SHOW_AI_FIX("cloud.show-ai-fix"),
+    CLOUD_SHOW_AI_FIX_NOTIFICATION("cloud.show-ai-fix-notification"),
+    CLOUD_VIEW_RUN("cloud.view-run"),
+    CLOUD_REFRESH_VIEW("cloud.refresh-view"),
 
     // Graph
     GRAPH_SHOW_ALL("graph.show-all"),
@@ -34,6 +57,7 @@ enum class TelemetryEvent(val eventName: String) {
 
     // Tasks
     TASKS_RUN("tasks.run"),
+    TASK_INIT("task.init"),
     TASKS_COPY_TO_CLIPBOARD("tasks.copy-to-clipboard"),
     TASKS_RUN_MANY("tasks.run-many"),
 
@@ -62,6 +86,7 @@ class TelemetryEventSource(val source: String) {
         val WELCOME_VIEW = "welcome-view"
         val MIGRATE_ANGULAR_PROMPT = "migrate-angular-prompt"
         val EDITOR_TOOLBAR = "editor-toolbar"
+        val NOTIFICATION = "notification"
 
         // Function to get all sources using reflection
         private fun getAllSources(): List<String> {

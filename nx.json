@@ -59,6 +59,9 @@
       "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
+    },
+    "storybook": {
+      "dependsOn": ["^build"]
     }
   },
   "namedInputs": {
@@ -79,21 +82,28 @@
       "!{projectRoot}/.eslintrc.json",
       "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)",
       "!{projectRoot}/src/test-setup.[jt]s",
-      "!{projectRoot}/src/test/**/*"
+      "!{projectRoot}/src/test/**/*",
+      "!{projectRoot}/.storybook/**/*",
+      "!{projectRoot}/tsconfig.storybook.json"
     ],
     "sharedGlobals": [
       {
         "runtime": "node -p '`${process.platform}_${process.arch}`'"
       },
       "{workspaceRoot}/.env"
-    ]
+    ],
+    "scripts": ["{workspaceRoot}/tools/scripts/**"]
   },
   "plugins": [
     {
       "plugin": "@nx/js/typescript",
       "options": {
         "build": true
-      }
+      },
+      "exclude": [
+        "libs/vscode/migrate/*",
+        "libs/vscode/migrate-sidebar-webview/*"
+      ]
     },
     {
       "plugin": "@nx/eslint/plugin",
@@ -103,14 +113,14 @@
     },
     {
       "plugin": "@nx/jest/plugin",
-      "exclude": ["apps/nxls-e2e/**/*"],
+      "exclude": ["apps/nxls-e2e/**/*", "apps/nx-mcp-e2e/**/*"],
       "options": {
         "targetName": "test"
       }
     },
     {
       "plugin": "@nx/jest/plugin",
-      "include": ["apps/nxls-e2e/**/*"],
+      "include": ["apps/nxls-e2e/**/*", "apps/nx-mcp-e2e/**/*"],
       "options": {
         "targetName": "e2e-local",
         "ciTargetName": "e2e-ci"
@@ -118,6 +128,8 @@
     },
     {
       "plugin": "@nx/cypress/plugin",
+      "//": "Temporary disable e2e tests for generate-ui-v2",
+      "exclude": ["apps/generate-ui-v2-e2e/**/*"],
       "options": {
         "targetName": "e2e-local",
         "openTargetName": "open-cypress",
@@ -125,7 +137,7 @@
       }
     },
     {
-      "plugin": "@nx/gradle",
+      "plugin": "@nx/gradle/plugin-v1",
       "options": {
         "testTargetName": "test",
         "classesTargetName": "classes",
@@ -133,11 +145,36 @@
         "includeSubprojectsTasks": true
       }
     },
-    "@nx/powerpack-enterprise-cloud",
-    "@nx/powerpack-owners"
+    "@nx/enterprise-cloud",
+    "@nx/owners",
+    {
+      "plugin": "@nx/js/typescript",
+      "include": [
+        "libs/vscode/migrate/*",
+        "libs/vscode/migrate-sidebar-webview/*"
+      ],
+      "options": {
+        "typecheck": {
+          "targetName": "typecheck"
+        },
+        "build": {
+          "targetName": "build",
+          "configName": "tsconfig.lib.json"
+        }
+      }
+    },
+    {
+      "plugin": "@nx/storybook/plugin",
+      "options": {
+        "serveStorybookTargetName": "storybook",
+        "buildStorybookTargetName": "build-storybook",
+        "testStorybookTargetName": "test-storybook",
+        "staticStorybookTargetName": "static-storybook"
+      }
+    }
   ],
   "sync": {
-    "globalGenerators": ["@nx/powerpack-owners:sync-codeowners-file"],
+    "globalGenerators": ["@nx/owners:sync-codeowners-file"],
     "applyChanges": true
   },
   "owners": {
@@ -152,7 +189,7 @@
   "conformance": {
     "rules": [
       {
-        "rule": "@nx/powerpack-conformance/ensure-owners",
+        "rule": "@nx/conformance/ensure-owners",
         "status": "enforced"
       }
     ]
