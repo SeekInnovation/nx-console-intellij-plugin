@@ -1,14 +1,11 @@
 package dev.nx.console.graph
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
-import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.util.messages.MessageBusConnection
-import dev.nx.console.graph.ui.*
+import dev.nx.console.graph.ui.DefaultNxGraphFile
+import dev.nx.console.graph.ui.NxGraphFileType
 import dev.nx.console.models.NxVersion
 import dev.nx.console.models.ProjectGraphOutput
 import dev.nx.console.nxls.NxWorkspaceRefreshListener
@@ -16,7 +13,6 @@ import dev.nx.console.nxls.NxlsService
 import dev.nx.console.utils.ProjectLevelCoroutineHolderService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -77,7 +73,7 @@ class DummyNxGraphService(override val project: Project, private val cs: Corouti
     }
 }
 
-@Service(Service.Level.PROJECT)
+//@Service(Service.Level.PROJECT)
 class OldNxGraphService(override val project: Project, private val cs: CoroutineScope) :
     INxGraphService {
 
@@ -88,6 +84,11 @@ class OldNxGraphService(override val project: Project, private val cs: Coroutine
     private var projectGraphOutput: ProjectGraphOutput? = null
 
     init {
+        if (true) {
+            throw IllegalStateException(
+                "PATCHED: OldNxGraphService was removed in this hacky version because of extreme performance issues"
+            )
+        }
         cs.launch {
             projectGraphOutput = NxlsService.getInstance(project).projectGraphOutput()
 
@@ -166,90 +167,90 @@ class OldNxGraphService(override val project: Project, private val cs: Coroutine
         }
     }
 
-    companion object {
-        fun getInstance(project: Project): OldNxGraphService =
-            project.getService(OldNxGraphService::class.java)
-    }
+//    companion object {
+//        fun getInstance(project: Project): OldNxGraphService =
+//            project.getService(OldNxGraphService::class.java)
+//    }
 }
 
-@Service(Service.Level.PROJECT)
-class NxGraphService(override val project: Project, private val cs: CoroutineScope) :
-    INxGraphService {
-
-    private var graphBrowser: NxGraphBrowser? = null
-
-    init {
-        val busConnection: MessageBusConnection = project.messageBus.connect()
-        busConnection.subscribe(
-            FileEditorManagerListener.FILE_EDITOR_MANAGER,
-            object : FileEditorManagerListener {
-                override fun fileClosed(source: FileEditorManager, file: VirtualFile) {
-                    // if we move a file to another tab, it will be closed and opened again
-                    // we don't want to dispose the browser in this case, so we wait for a second
-                    checkDisposalAfterDelay()
-                }
-            }
-        )
-    }
-
-    private fun showNxGraphInEditor() {
-        ApplicationManager.getApplication().invokeAndWait {
-            val fileEditorManager = FileEditorManager.getInstance(project)
-
-            val nxGraphEditor =
-                fileEditorManager.allEditors.find {
-                    it.file.fileType.name == NxGraphFileType.INSTANCE.name
-                }
-
-            if (nxGraphEditor != null) {
-                fileEditorManager.openFile(nxGraphEditor.file, true)
-                return@invokeAndWait
-            }
-
-            val graphBrowser = NxGraphBrowser(project)
-            val virtualFile = DefaultNxGraphFile("Nx Graph", graphBrowser)
-
-            this@NxGraphService.graphBrowser = graphBrowser
-
-            fileEditorManager.openFile(virtualFile, true)
-        }
-    }
-
-    override fun selectAllProjects() {
-        showNxGraphInEditor()
-        graphBrowser?.selectAllProjects()
-    }
-
-    override fun focusProject(projectName: String) {
-        showNxGraphInEditor()
-        graphBrowser?.focusProject(projectName)
-    }
-
-    override fun focusTaskGroup(taskGroupName: String) {
-        showNxGraphInEditor()
-        graphBrowser?.focusTargetGroup(taskGroupName)
-    }
-
-    override fun focusTask(nxProject: String, nxTarget: String) {
-        showNxGraphInEditor()
-        graphBrowser?.focusTarget(nxProject, nxTarget)
-    }
-
-    private fun checkDisposalAfterDelay() {
-        cs.launch {
-            delay(1000)
-            val editors = FileEditorManager.getInstance(project).allEditors
-            val hasNxGraphEditor =
-                editors.any { it.file.fileType.name == NxGraphFileType.INSTANCE.name }
-
-            if (!hasNxGraphEditor) {
-                graphBrowser?.also { Disposer.dispose(it) }
-            }
-        }
-    }
-
-    companion object {
-        fun getInstance(project: Project): NxGraphService =
-            project.getService(NxGraphService::class.java)
-    }
-}
+//@Service(Service.Level.PROJECT)
+//class NxGraphService(override val project: Project, private val cs: CoroutineScope) :
+//    INxGraphService {
+//
+//    private var graphBrowser: NxGraphBrowser? = null
+//
+//    init {
+//        val busConnection: MessageBusConnection = project.messageBus.connect()
+//        busConnection.subscribe(
+//            FileEditorManagerListener.FILE_EDITOR_MANAGER,
+//            object : FileEditorManagerListener {
+//                override fun fileClosed(source: FileEditorManager, file: VirtualFile) {
+//                    // if we move a file to another tab, it will be closed and opened again
+//                    // we don't want to dispose the browser in this case, so we wait for a second
+//                    checkDisposalAfterDelay()
+//                }
+//            }
+//        )
+//    }
+//
+//    private fun showNxGraphInEditor() {
+//        ApplicationManager.getApplication().invokeAndWait {
+//            val fileEditorManager = FileEditorManager.getInstance(project)
+//
+//            val nxGraphEditor =
+//                fileEditorManager.allEditors.find {
+//                    it.file.fileType.name == NxGraphFileType.INSTANCE.name
+//                }
+//
+//            if (nxGraphEditor != null) {
+//                fileEditorManager.openFile(nxGraphEditor.file, true)
+//                return@invokeAndWait
+//            }
+//
+//            val graphBrowser = NxGraphBrowser(project)
+//            val virtualFile = DefaultNxGraphFile("Nx Graph", graphBrowser)
+//
+//            this@NxGraphService.graphBrowser = graphBrowser
+//
+//            fileEditorManager.openFile(virtualFile, true)
+//        }
+//    }
+//
+//    override fun selectAllProjects() {
+//        showNxGraphInEditor()
+//        graphBrowser?.selectAllProjects()
+//    }
+//
+//    override fun focusProject(projectName: String) {
+//        showNxGraphInEditor()
+//        graphBrowser?.focusProject(projectName)
+//    }
+//
+//    override fun focusTaskGroup(taskGroupName: String) {
+//        showNxGraphInEditor()
+//        graphBrowser?.focusTargetGroup(taskGroupName)
+//    }
+//
+//    override fun focusTask(nxProject: String, nxTarget: String) {
+//        showNxGraphInEditor()
+//        graphBrowser?.focusTarget(nxProject, nxTarget)
+//    }
+//
+//    private fun checkDisposalAfterDelay() {
+//        cs.launch {
+//            delay(1000)
+//            val editors = FileEditorManager.getInstance(project).allEditors
+//            val hasNxGraphEditor =
+//                editors.any { it.file.fileType.name == NxGraphFileType.INSTANCE.name }
+//
+//            if (!hasNxGraphEditor) {
+//                graphBrowser?.also { Disposer.dispose(it) }
+//            }
+//        }
+//    }
+//
+//    companion object {
+//        fun getInstance(project: Project): NxGraphService =
+//            project.getService(NxGraphService::class.java)
+//    }
+//}

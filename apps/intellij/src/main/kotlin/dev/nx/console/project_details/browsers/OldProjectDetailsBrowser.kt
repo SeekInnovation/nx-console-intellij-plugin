@@ -162,6 +162,9 @@ class OldProjectDetailsBrowser(project: Project, private val file: VirtualFile) 
     }
 
     private fun loadHtml() {
+        thisLogger().info("PATCHED: not executing loadHtml in OldProjectDetailsBrowser")
+        if (true) return
+
         if (currentLoadHtmlJob?.isActive == true) {
             currentLoadHtmlJob?.cancel()
         }

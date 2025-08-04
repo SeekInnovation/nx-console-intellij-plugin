@@ -50,10 +50,10 @@ fun getNxAngularProject(name: String, projectJson: VirtualFile): AngularProject?
             } catch (e: ProcessCanceledException) {
                 throw e
             } catch (e: Exception) {
-                NxAngularConfigProvider::class
-                    .java
-                    .thisLogger()
-                    .warn("Cannot load " + projectJson.name + ": " + e.message)
+//                NxAngularConfigProvider::class
+//                    .java
+//                    .thisLogger()
+//                    .warn("Cannot load " + projectJson.name + ": " + e.message)
                 null
             }
         cached = CachedAngularProjectConfig(config, documentModStamp, fileModStamp)

@@ -504,7 +504,7 @@ class OldNxGraphBrowser(
         data class FocusTask(val nxProject: String, val nxTarget: String) : Command() {}
     }
 
-    @Service(Service.Level.PROJECT)
+//    @Service(Service.Level.PROJECT)
     private class OldNxGraphBrowserCoroutineHolder(val cs: CoroutineScope) {
         companion object {
             fun getInstance(project: Project): OldNxGraphBrowserCoroutineHolder =

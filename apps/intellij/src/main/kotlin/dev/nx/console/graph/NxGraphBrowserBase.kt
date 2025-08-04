@@ -1,13 +1,11 @@
 package dev.nx.console.graph
 
 import NxGraphServer
-import StandardNxGraphServer
 import com.intellij.ide.ui.UISettingsListener
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.EDT
-import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -43,7 +41,7 @@ import kotlinx.serialization.json.Json
 abstract class NxGraphBrowserBase(protected val project: Project) : Disposable {
     protected val browser: JBCefBrowser = JBCefBrowser()
 
-    private val graphServer: NxGraphServer = StandardNxGraphServer.getInstance(project)
+    private lateinit var graphServer: NxGraphServer
     private val queryMessenger = createGraphRequestMessenger()
     private val resetQuery: JBCefJSQuery = createResetQuery()
 
@@ -488,7 +486,7 @@ data class NxGraphRequest(
     val error: String? = null,
 )
 
-@Service(Service.Level.PROJECT)
+//@Service(Service.Level.PROJECT)
 class NxGraphBrowserBaseCoroutineHolder(val coroutineScope: CoroutineScope) {
     companion object {
         fun getInstance(project: Project): NxGraphBrowserBaseCoroutineHolder =

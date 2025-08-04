@@ -1,6 +1,5 @@
 package dev.nx.console.nxls
 
-import StandardNxGraphServer
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionPlaces
@@ -97,7 +96,7 @@ class NxRefreshWorkspaceService(private val project: Project) {
                                     indicator.fraction = 0.1
                                     NxlsService.getInstance(project).restart()
                                     indicator.fraction = 0.5
-                                    StandardNxGraphServer.getInstance(project).restart()
+//                                    StandardNxGraphServer.getInstance(project).restart()
                                     indicator.fraction = 0.8
                                     NxlsService.getInstance(project).refreshWorkspace()
                                     indicator.fraction = 1.0

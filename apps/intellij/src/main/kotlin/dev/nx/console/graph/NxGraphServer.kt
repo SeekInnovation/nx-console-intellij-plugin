@@ -21,23 +21,23 @@ data class WebviewRequest(val type: String, val id: String) {}
 
 data class WebviewResponse(val type: String, val id: String, val payload: String) {}
 
-@Service(Service.Level.PROJECT)
-class StandardNxGraphServer(project: Project, cs: CoroutineScope) :
-    NxGraphServer(project, 5580, false, cs) {
-    companion object {
-        fun getInstance(project: Project): NxGraphServer =
-            project.getService(StandardNxGraphServer::class.java)
-    }
-}
+//@Service(Service.Level.PROJECT)
+//class StandardNxGraphServer(project: Project, cs: CoroutineScope) :
+//    NxGraphServer(project, 5580, false, cs) {
+//    companion object {
+//        fun getInstance(project: Project): NxGraphServer =
+//            project.getService(StandardNxGraphServer::class.java)
+//    }
+//}
 
-@Service(Service.Level.PROJECT)
-class AffectedNxGraphServer(project: Project, cs: CoroutineScope) :
-    NxGraphServer(project, 5590, true, cs) {
-    companion object {
-        fun getInstance(project: Project): NxGraphServer =
-            project.getService(AffectedNxGraphServer::class.java)
-    }
-}
+//@Service(Service.Level.PROJECT)
+//class AffectedNxGraphServer(project: Project, cs: CoroutineScope) :
+//    NxGraphServer(project, 5590, true, cs) {
+//    companion object {
+//        fun getInstance(project: Project): NxGraphServer =
+//            project.getService(AffectedNxGraphServer::class.java)
+//    }
+//}
 
 val logger = logger<NxGraphServer>()
 
@@ -57,6 +57,11 @@ open class NxGraphServer(
     private var isStarting = false
 
     init {
+        if (true) {
+            throw IllegalStateException(
+                "PATCHED: NxGraphServer was removed in this hacky version because of extreme performance issues"
+            )
+        }
         with(project.messageBus.connect()) {
             subscribe(
                 NxlsService.NX_WORKSPACE_REFRESH_TOPIC,

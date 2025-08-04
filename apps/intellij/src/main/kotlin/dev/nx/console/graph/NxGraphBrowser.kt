@@ -54,6 +54,9 @@ class NxGraphBrowser(project: Project) : NxGraphBrowserBase(project) {
     }
 
     private fun loadHtml() {
+        thisLogger().info("PATCHED: not executing loadHtml in NxGraphBrowser")
+        if (true) return
+
         if (currentLoadHtmlJob?.isActive == true) {
             currentLoadHtmlJob?.cancel()
         }
