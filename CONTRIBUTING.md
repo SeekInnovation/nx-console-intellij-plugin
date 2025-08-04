@@ -28,7 +28,7 @@ yarn install
 yarn nx run-many --target=build
 ```
 
-Then distribute `dist/apps/intellij/distributions/nx-console-1.99.1-thomas.zip`.
+Then distribute `dist/apps/intellij/distributions/nx-console-1.99.3-thomas.zip`.
 Install it in IntelliJ IDEA using "Install plugin from disk".
 
 ### Running the Extension locally
