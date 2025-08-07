@@ -39,6 +39,13 @@ export class NativeWatcher {
   }
 
   private async initWatcher() {
+    if (true as any) {
+      lspLogger.log(
+        'PATCHED: not running NativeWatcher, as it creates too many file watchers and processes too many events in fucking NodeJS. Will just manually refresh the NX workspace if necessary.',
+      );
+      return;
+    }
+
     const native = await importNxPackagePath<typeof import('nx/src/native')>(
       this.workspacePath,
       'src/native/index.js',
@@ -46,6 +53,7 @@ export class NativeWatcher {
     );
     this.watcher = new native.Watcher(this.workspacePath);
 
+    // TODO [fix this shitty plugin] this plugin just fucking watches the entire workspace?! That many file-watchers will really create issues. Also does not ignore .local, dist, minio data, etc...
     this.watcher.watch((err: string | null, events: WatchEvent[]) => {
       if (err) {
         lspLogger.log('Error watching files: ' + err);
@@ -61,8 +69,9 @@ export class NativeWatcher {
                 path.endsWith('tsconfig.base.json') ||
                 NX_PLUGIN_PATTERNS_TO_WATCH.some((pattern) =>
                   minimatch([path], pattern, { dot: true }),
-                ) ||
-                NativeWatcher.openDocuments.has(path)) &&
+                )) &&
+              // TODO [fix this shitty plugin] why the fuck would it refresh the workspace if ANY open document changed? removed that check, so in case we want to re-enable the watcher, at least unnecessary events won't be processed.
+              // || NativeWatcher.openDocuments.has(path)
               !path.startsWith('node_modules') &&
               !path.startsWith(normalize('.nx/cache')) &&
               !path.startsWith(normalize('.yarn/cache')) &&

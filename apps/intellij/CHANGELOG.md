@@ -6,6 +6,6 @@
 ### Added
 - Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
 
-## [1.99.3-thomas]
+## [1.99.4-thomas]
 ### Added
 - Patched version from Thomas
