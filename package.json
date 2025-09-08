@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.21.0",
-    "@modelcontextprotocol/inspector": "^0.16.1",
+    "@modelcontextprotocol/inspector": "^0.16.6",
     "@monodon/typescript-nx-imports-plugin": "0.3.0",
     "@nx/conformance": "21.0.0-beta.0",
     "@nx/cypress": "21.3.10",
