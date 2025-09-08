@@ -3045,24 +3045,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@modelcontextprotocol/inspector-cli@npm:^0.16.1":
-  version: 0.16.1
-  resolution: "@modelcontextprotocol/inspector-cli@npm:0.16.1"
+"@modelcontextprotocol/inspector-cli@npm:^0.16.6":
+  version: 0.16.6
+  resolution: "@modelcontextprotocol/inspector-cli@npm:0.16.6"
   dependencies:
-    "@modelcontextprotocol/sdk": ^1.13.1
+    "@modelcontextprotocol/sdk": ^1.17.5
     commander: ^13.1.0
     spawn-rx: ^5.1.2
   bin:
     mcp-inspector-cli: build/cli.js
-  checksum: 9ccc118e2d6d55466e3e53f74732dabcc3bba61452482e5856bbcb7816ec46edc7eb0dd3271a68acbe83fccc53ef14863cf392555e1c95a9e80f40c6bf6074f8
+  checksum: bbb369f1ec8158e1b9ce62edce87267ddf158811567c0fcad9b20087e51c9fbafca0c5e037cf77f9d8d570f43ef7ac807b2cfcb5697c882054fde19d70390190
   languageName: node
   linkType: hard
 
-"@modelcontextprotocol/inspector-client@npm:^0.16.1":
-  version: 0.16.1
-  resolution: "@modelcontextprotocol/inspector-client@npm:0.16.1"
+"@modelcontextprotocol/inspector-client@npm:^0.16.6":
+  version: 0.16.6
+  resolution: "@modelcontextprotocol/inspector-client@npm:0.16.6"
   dependencies:
-    "@modelcontextprotocol/sdk": ^1.13.1
+    "@modelcontextprotocol/sdk": ^1.17.5
     "@radix-ui/react-checkbox": ^1.1.4
     "@radix-ui/react-dialog": ^1.1.3
     "@radix-ui/react-icons": ^1.3.0
@@ -3085,50 +3085,49 @@ __metadata:
     react-simple-code-editor: ^0.14.1
     serve-handler: ^6.1.6
     tailwind-merge: ^2.5.3
-    tailwindcss-animate: ^1.0.7
-    zod: ^3.23.8
+    zod: ^3.25.76
   bin:
     mcp-inspector-client: bin/start.js
-  checksum: 164e4e23942e13913bab52415d399dd827fd4d5d236ae5ffa33c7fe8835285d436151c36dcd9bb1aa6eed0ad023b44e1caaa17aacf36aaafa7d167937a65deda
+  checksum: c7594f54dda248895f39adc64e86128de67d6109bd762de62897e548e09823bee91af34c72bd6fc58e47c3f9509b703107319956d24c372779b8b1095a75c11b
   languageName: node
   linkType: hard
 
-"@modelcontextprotocol/inspector-server@npm:^0.16.1":
-  version: 0.16.1
-  resolution: "@modelcontextprotocol/inspector-server@npm:0.16.1"
+"@modelcontextprotocol/inspector-server@npm:^0.16.6":
+  version: 0.16.6
+  resolution: "@modelcontextprotocol/inspector-server@npm:0.16.6"
   dependencies:
-    "@modelcontextprotocol/sdk": ^1.13.1
+    "@modelcontextprotocol/sdk": ^1.17.5
     cors: ^2.8.5
     express: ^5.1.0
     ws: ^8.18.0
-    zod: ^3.23.8
+    zod: ^3.25.76
   bin:
     mcp-inspector-server: build/index.js
-  checksum: f148a35d244e43f91ca71e9bdf1154c4cbcb394d7fe1c40f8b865901df8d684ccdf536c7c63d6e33f4238d6af43a7984c213fb7a70858120593ae678d94257be
+  checksum: 9ae9b3268e7f4f2cd1e6e389bfa417e9f95c431cabfda32cd6302e7b5c58bff78f072c9e322ce6ac3249a4c5a00ea31d6f980a65b4f9dc149220882930a043da
   languageName: node
   linkType: hard
 
-"@modelcontextprotocol/inspector@npm:^0.16.1":
-  version: 0.16.1
-  resolution: "@modelcontextprotocol/inspector@npm:0.16.1"
+"@modelcontextprotocol/inspector@npm:^0.16.6":
+  version: 0.16.6
+  resolution: "@modelcontextprotocol/inspector@npm:0.16.6"
   dependencies:
-    "@modelcontextprotocol/inspector-cli": ^0.16.1
-    "@modelcontextprotocol/inspector-client": ^0.16.1
-    "@modelcontextprotocol/inspector-server": ^0.16.1
-    "@modelcontextprotocol/sdk": ^1.13.1
-    concurrently: ^9.0.1
-    open: ^10.1.0
-    shell-quote: ^1.8.2
+    "@modelcontextprotocol/inspector-cli": ^0.16.6
+    "@modelcontextprotocol/inspector-client": ^0.16.6
+    "@modelcontextprotocol/inspector-server": ^0.16.6
+    "@modelcontextprotocol/sdk": ^1.17.5
+    concurrently: ^9.2.0
+    open: ^10.2.0
+    shell-quote: ^1.8.3
     spawn-rx: ^5.1.2
     ts-node: ^10.9.2
-    zod: ^3.23.8
+    zod: ^3.25.76
   bin:
     mcp-inspector: cli/build/cli.js
-  checksum: e7ad98a7d00982682337c764642e48fc27295534e51a2bac345040a7ca6d324e715dd3d5798cc20cf7f2cac7639432283c9316a9d5b0cc45e596a65caec61aa4
+  checksum: d69b6bc5245e7b7ef49769d807326b58ab722afa77852bbf4d9666dab98ea5a2c575bf9ba7faf2c0bfbdcc5e2e39f2a49992e3f6eb76adb1f812e0ad030eded4
   languageName: node
   linkType: hard
 
-"@modelcontextprotocol/sdk@npm:^1.13.1, @modelcontextprotocol/sdk@npm:^1.15.1":
+"@modelcontextprotocol/sdk@npm:^1.15.1":
   version: 1.15.1
   resolution: "@modelcontextprotocol/sdk@npm:1.15.1"
   dependencies:
@@ -3145,6 +3144,26 @@ __metadata:
     zod: ^3.23.8
     zod-to-json-schema: ^3.24.1
   checksum: ac4bf4ae76389d8b6a9c8b5ec4edf564f79b1da390165a9e762058c1e7314f91b2d5cc62be507e41a65053840dd18b66979feae8c76960b46f3770fa9946f720
+  languageName: node
+  linkType: hard
+
+"@modelcontextprotocol/sdk@npm:^1.17.5":
+  version: 1.17.5
+  resolution: "@modelcontextprotocol/sdk@npm:1.17.5"
+  dependencies:
+    ajv: ^6.12.6
+    content-type: ^1.0.5
+    cors: ^2.8.5
+    cross-spawn: ^7.0.5
+    eventsource: ^3.0.2
+    eventsource-parser: ^3.0.0
+    express: ^5.0.1
+    express-rate-limit: ^7.5.0
+    pkce-challenge: ^5.0.0
+    raw-body: ^3.0.0
+    zod: ^3.23.8
+    zod-to-json-schema: ^3.24.1
+  checksum: 94ebd8f5464e9fadc20a76efe79eaeb07b1c1ea6ead01e05dffa475723c001c67e1cf02169b2f0d9c1cd7d1fa75c0b69304a287175901e2e8398e8afd0cf12d2
   languageName: node
   linkType: hard
 
@@ -8889,6 +8908,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chalk@npm:4.1.2, chalk@npm:^4.0.0, chalk@npm:^4.0.2, chalk@npm:^4.1.0, chalk@npm:^4.1.2":
+  version: 4.1.2
+  resolution: "chalk@npm:4.1.2"
+  dependencies:
+    ansi-styles: ^4.1.0
+    supports-color: ^7.1.0
+  checksum: fe75c9d5c76a7a98d45495b91b2172fa3b7a09e0cc9370e5c8feb1c567b85c4288e2b3fded7cfdd7359ac28d6b3844feb8b82b8686842e93d23c827c417e83fc
+  languageName: node
+  linkType: hard
+
 "chalk@npm:^2.3.2, chalk@npm:^2.4.2":
   version: 2.4.2
   resolution: "chalk@npm:2.4.2"
@@ -8897,16 +8926,6 @@ __metadata:
     escape-string-regexp: ^1.0.5
     supports-color: ^5.3.0
   checksum: ec3661d38fe77f681200f878edbd9448821924e0f93a9cefc0e26a33b145f1027a2084bf19967160d11e1f03bfe4eaffcabf5493b89098b2782c3fe0b03d80c2
-  languageName: node
-  linkType: hard
-
-"chalk@npm:^4.0.0, chalk@npm:^4.0.2, chalk@npm:^4.1.0, chalk@npm:^4.1.2":
-  version: 4.1.2
-  resolution: "chalk@npm:4.1.2"
-  dependencies:
-    ansi-styles: ^4.1.0
-    supports-color: ^7.1.0
-  checksum: fe75c9d5c76a7a98d45495b91b2172fa3b7a09e0cc9370e5c8feb1c567b85c4288e2b3fded7cfdd7359ac28d6b3844feb8b82b8686842e93d23c827c417e83fc
   languageName: node
   linkType: hard
 
@@ -9443,21 +9462,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"concurrently@npm:^9.0.1":
-  version: 9.1.2
-  resolution: "concurrently@npm:9.1.2"
+"concurrently@npm:^9.2.0":
+  version: 9.2.1
+  resolution: "concurrently@npm:9.2.1"
   dependencies:
-    chalk: ^4.1.2
-    lodash: ^4.17.21
-    rxjs: ^7.8.1
-    shell-quote: ^1.8.1
-    supports-color: ^8.1.1
-    tree-kill: ^1.2.2
-    yargs: ^17.7.2
+    chalk: 4.1.2
+    rxjs: 7.8.2
+    shell-quote: 1.8.3
+    supports-color: 8.1.1
+    tree-kill: 1.2.2
+    yargs: 17.7.2
   bin:
     conc: dist/bin/concurrently.js
     concurrently: dist/bin/concurrently.js
-  checksum: 9e25e8ee6272ada26739aff1fb43e96ac458fafca82f45b8360bdd9115d60bbc679d282dfc52001b861b6e9f32b3063aed975691d8dec9e62807a9679763a1d8
+  checksum: 95c6cdde21b6304d53005d872318805f69e153d4cedfd4d720cc5776f56fbd073b38297cfe56bacfc8fbdba9b6c38ac1233739abd25b023761fd03b896a4cea5
   languageName: node
   linkType: hard
 
@@ -16523,7 +16541,7 @@ __metadata:
     "@microsoft/fast-components": ^2.30.6
     "@microsoft/fast-element": ^1.12.0
     "@microsoft/fast-foundation": ^2.49.0
-    "@modelcontextprotocol/inspector": ^0.16.1
+    "@modelcontextprotocol/inspector": ^0.16.6
     "@modelcontextprotocol/sdk": ^1.15.1
     "@monodon/typescript-nx-imports-plugin": 0.3.0
     "@nx/conformance": 21.0.0-beta.0
@@ -16851,6 +16869,18 @@ __metadata:
     is-inside-container: ^1.0.0
     is-wsl: ^3.1.0
   checksum: cb40d9786e8c679a1c647c62ad3642bbf1a8cc986c3ec970e99ed13d279c93328ea46bf756db64ea465d2d707815d4e792e7ba906830c3439cc8577cdefb8610
+  languageName: node
+  linkType: hard
+
+"open@npm:^10.2.0":
+  version: 10.2.0
+  resolution: "open@npm:10.2.0"
+  dependencies:
+    default-browser: ^5.2.1
+    define-lazy-prop: ^3.0.0
+    is-inside-container: ^1.0.0
+    wsl-utils: ^0.1.0
+  checksum: 64e2e1fb1dc5ab82af06c990467237b8fd349b1b9ecc6324d12df337a005d039cec11f758abea148be68878ccd616977005682c48ef3c5c7ba48bd3e5d6a3dbb
   languageName: node
   linkType: hard
 
@@ -19067,7 +19097,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rxjs@npm:^7.4.0, rxjs@npm:^7.5.1, rxjs@npm:^7.8.0, rxjs@npm:^7.8.1":
+"rxjs@npm:7.8.2, rxjs@npm:^7.4.0, rxjs@npm:^7.5.1, rxjs@npm:^7.8.0, rxjs@npm:^7.8.1":
   version: 7.8.2
   resolution: "rxjs@npm:7.8.2"
   dependencies:
@@ -19702,7 +19732,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shell-quote@npm:^1.8.1, shell-quote@npm:^1.8.2":
+"shell-quote@npm:1.8.3, shell-quote@npm:^1.8.3":
+  version: 1.8.3
+  resolution: "shell-quote@npm:1.8.3"
+  checksum: 550dd84e677f8915eb013d43689c80bb114860649ec5298eb978f40b8f3d4bc4ccb072b82c094eb3548dc587144bb3965a8676f0d685c1cf4c40b5dc27166242
+  languageName: node
+  linkType: hard
+
+"shell-quote@npm:^1.8.1":
   version: 1.8.2
   resolution: "shell-quote@npm:1.8.2"
   checksum: 1e97b62ced1c4c5135015978ebf273bed1f425a68cf84163e83fbb0f34b3ff9471e656720dab2b7cbb4ae0f58998e686d17d166c28dfb3662acd009e8bd7faed
@@ -20377,6 +20414,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"supports-color@npm:8.1.1, supports-color@npm:^8.0.0, supports-color@npm:^8.1.1":
+  version: 8.1.1
+  resolution: "supports-color@npm:8.1.1"
+  dependencies:
+    has-flag: ^4.0.0
+  checksum: c052193a7e43c6cdc741eb7f378df605636e01ad434badf7324f17fb60c69a880d8d8fcdcb562cf94c2350e57b937d7425ab5b8326c67c2adc48f7c87c1db406
+  languageName: node
+  linkType: hard
+
 "supports-color@npm:^5.3.0":
   version: 5.5.0
   resolution: "supports-color@npm:5.5.0"
@@ -20392,15 +20438,6 @@ __metadata:
   dependencies:
     has-flag: ^4.0.0
   checksum: 3dda818de06ebbe5b9653e07842d9479f3555ebc77e9a0280caf5a14fb877ffee9ed57007c3b78f5a6324b8dbeec648d9e97a24e2ed9fdb81ddc69ea07100f4a
-  languageName: node
-  linkType: hard
-
-"supports-color@npm:^8.0.0, supports-color@npm:^8.1.1":
-  version: 8.1.1
-  resolution: "supports-color@npm:8.1.1"
-  dependencies:
-    has-flag: ^4.0.0
-  checksum: c052193a7e43c6cdc741eb7f378df605636e01ad434badf7324f17fb60c69a880d8d8fcdcb562cf94c2350e57b937d7425ab5b8326c67c2adc48f7c87c1db406
   languageName: node
   linkType: hard
 
@@ -20481,15 +20518,6 @@ __metadata:
   version: 2.6.0
   resolution: "tailwind-merge@npm:2.6.0"
   checksum: 18976c4096920bc6125f1dc837479805de996d86bcc636f98436f65c297003bde89ffe51dfd325b7c97fc71b1dbba8505459dd96010e7b181badd29aea996440
-  languageName: node
-  linkType: hard
-
-"tailwindcss-animate@npm:^1.0.7":
-  version: 1.0.7
-  resolution: "tailwindcss-animate@npm:1.0.7"
-  peerDependencies:
-    tailwindcss: "*"
-  checksum: c1760983eb3fec0c8421e95082bf308e6845df43e2f90862386366e82545c801b26b4d189c4cd23d6915252b76d18005c8e5f591f8b119944c7fb8650d0f8bce
   languageName: node
   linkType: hard
 
@@ -22284,6 +22312,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"wsl-utils@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "wsl-utils@npm:0.1.0"
+  dependencies:
+    is-wsl: ^3.1.0
+  checksum: de4c92187e04c3c27b4478f410a02e81c351dc85efa3447bf1666f34fc80baacd890a6698ec91995631714086992036013286aea3d77e6974020d40a08e00aec
+  languageName: node
+  linkType: hard
+
 "xml-name-validator@npm:^5.0.0":
   version: 5.0.0
   resolution: "xml-name-validator@npm:5.0.0"
@@ -22492,6 +22529,13 @@ __metadata:
   version: 3.24.4
   resolution: "zod@npm:3.24.4"
   checksum: 62829789765a9187bd72bed3972a7c1a39fdfe6c59bc752eedabec5f99af701658471b8577d22e0fee2081e6e35d4efc93c02c90e13350755a36feadbf72bbbc
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.25.76":
+  version: 3.25.76
+  resolution: "zod@npm:3.25.76"
+  checksum: c9a403a62b329188a5f6bd24d5d935d2bba345f7ab8151d1baa1505b5da9f227fb139354b043711490c798e91f3df75991395e40142e6510a4b16409f302b849
   languageName: node
   linkType: hard
 
