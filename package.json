@@ -132,7 +132,7 @@
     "typescript": "5.8.3",
     "universal-analytics": "0.5.3",
     "uuid": "^8.3.2",
-    "vite": "^6.3.5",
+    "vite": "^6.4.1",
     "vscode-jsonrpc": "^8.2.1",
     "webpack": "^5.100.2",
     "zone.js": "0.14.3"
