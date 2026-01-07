@@ -2397,6 +2397,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@hono/node-server@npm:^1.19.7":
+  version: 1.19.7
+  resolution: "@hono/node-server@npm:1.19.7"
+  peerDependencies:
+    hono: ^4
+  checksum: d2ac297af1ef9e300981876971eea0770f78212f40b15a9be33bf31ebb454629f93c076322399d72da08042899023c3d0b62a0c9a6c61e23ab2bd7343f0a336d
+  languageName: node
+  linkType: hard
+
 "@humanwhocodes/config-array@npm:^0.11.14":
   version: 0.11.14
   resolution: "@humanwhocodes/config-array@npm:0.11.14"
@@ -3128,7 +3137,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@modelcontextprotocol/sdk@npm:^1.13.1, @modelcontextprotocol/sdk@npm:^1.15.1":
+"@modelcontextprotocol/sdk@npm:^1.13.1":
   version: 1.15.1
   resolution: "@modelcontextprotocol/sdk@npm:1.15.1"
   dependencies:
@@ -3145,6 +3154,38 @@ __metadata:
     zod: ^3.23.8
     zod-to-json-schema: ^3.24.1
   checksum: ac4bf4ae76389d8b6a9c8b5ec4edf564f79b1da390165a9e762058c1e7314f91b2d5cc62be507e41a65053840dd18b66979feae8c76960b46f3770fa9946f720
+  languageName: node
+  linkType: hard
+
+"@modelcontextprotocol/sdk@npm:^1.25.2":
+  version: 1.25.2
+  resolution: "@modelcontextprotocol/sdk@npm:1.25.2"
+  dependencies:
+    "@hono/node-server": ^1.19.7
+    ajv: ^8.17.1
+    ajv-formats: ^3.0.1
+    content-type: ^1.0.5
+    cors: ^2.8.5
+    cross-spawn: ^7.0.5
+    eventsource: ^3.0.2
+    eventsource-parser: ^3.0.0
+    express: ^5.0.1
+    express-rate-limit: ^7.5.0
+    jose: ^6.1.1
+    json-schema-typed: ^8.0.2
+    pkce-challenge: ^5.0.0
+    raw-body: ^3.0.0
+    zod: ^3.25 || ^4.0
+    zod-to-json-schema: ^3.25.0
+  peerDependencies:
+    "@cfworker/json-schema": ^4.1.1
+    zod: ^3.25 || ^4.0
+  peerDependenciesMeta:
+    "@cfworker/json-schema":
+      optional: true
+    zod:
+      optional: false
+  checksum: 24c600de2da3478e5ce8a6ae3a00744a3d8a08e9291e6ebb236ca563d5a8d69bee759223950914ef19329ce26b24946639438cc6a7bf33839180348055be5eb9
   languageName: node
   linkType: hard
 
@@ -7832,6 +7873,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ajv-formats@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "ajv-formats@npm:3.0.1"
+  dependencies:
+    ajv: ^8.0.0
+  peerDependencies:
+    ajv: ^8.0.0
+  peerDependenciesMeta:
+    ajv:
+      optional: true
+  checksum: f4e1fe232d67fcafc02eafe373a7a9962351e0439dd0736647ca75c93c3da23b430b6502c255ab4315410ae330d4f3013ac9fe226c40b2524ca93a58e786d086
+  languageName: node
+  linkType: hard
+
 "ajv-keywords@npm:^3.5.2":
   version: 3.5.2
   resolution: "ajv-keywords@npm:3.5.2"
@@ -7864,7 +7919,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.0.0, ajv@npm:^8.12.0, ajv@npm:^8.9.0":
+"ajv@npm:^8.0.0, ajv@npm:^8.12.0, ajv@npm:^8.17.1, ajv@npm:^8.9.0":
   version: 8.17.1
   resolution: "ajv@npm:8.17.1"
   dependencies:
@@ -14222,6 +14277,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jose@npm:^6.1.1":
+  version: 6.1.3
+  resolution: "jose@npm:6.1.3"
+  checksum: 7f51c7e77f82b70ef88ede9fd1760298bc0ffbf143b9d94f78c08462987ae61864535c1856bc6c26d335f857c7d41f4fffcc29134212c19ea929ce34a4c790f0
+  languageName: node
+  linkType: hard
+
 "js-tokens@npm:^3.0.0 || ^4.0.0, js-tokens@npm:^4.0.0":
   version: 4.0.0
   resolution: "js-tokens@npm:4.0.0"
@@ -14349,6 +14411,13 @@ __metadata:
   version: 1.0.0
   resolution: "json-schema-traverse@npm:1.0.0"
   checksum: 02f2f466cdb0362558b2f1fd5e15cce82ef55d60cd7f8fa828cf35ba74330f8d767fcae5c5c2adb7851fa811766c694b9405810879bc4e1ddd78a7c0e03658ad
+  languageName: node
+  linkType: hard
+
+"json-schema-typed@npm:^8.0.2":
+  version: 8.0.2
+  resolution: "json-schema-typed@npm:8.0.2"
+  checksum: 8ddb3c2b1bad406507ea077d4d8cfe6dae5b920f642efab145e4bd6e0d3984f01034ee4467bbeabd51e129b17d7446ceb357a6b1648857fdfaf61ba8ef621ff6
   languageName: node
   linkType: hard
 
@@ -16524,7 +16593,7 @@ __metadata:
     "@microsoft/fast-element": ^1.12.0
     "@microsoft/fast-foundation": ^2.49.0
     "@modelcontextprotocol/inspector": ^0.16.1
-    "@modelcontextprotocol/sdk": ^1.15.1
+    "@modelcontextprotocol/sdk": ^1.25.2
     "@monodon/typescript-nx-imports-plugin": 0.3.0
     "@nx/conformance": 21.0.0-beta.0
     "@nx/cypress": 21.3.10
@@ -22488,10 +22557,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"zod-to-json-schema@npm:^3.25.0":
+  version: 3.25.1
+  resolution: "zod-to-json-schema@npm:3.25.1"
+  peerDependencies:
+    zod: ^3.25 || ^4
+  checksum: 2033915aed81729544398a0000a63fb474972a654df712610343b8143c254d26f5d76cbee02b135648f299a0dc71be79a724d25a71a755085b438c7bfac6b9c8
+  languageName: node
+  linkType: hard
+
 "zod@npm:^3.23.8, zod@npm:^3.24.2":
   version: 3.24.4
   resolution: "zod@npm:3.24.4"
   checksum: 62829789765a9187bd72bed3972a7c1a39fdfe6c59bc752eedabec5f99af701658471b8577d22e0fee2081e6e35d4efc93c02c90e13350755a36feadbf72bbbc
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.25 || ^4.0":
+  version: 4.3.5
+  resolution: "zod@npm:4.3.5"
+  checksum: 68691183a91c67c4102db20139f3b5af288c59b4b11eb2239d712aae99dc6c1cecaeebcb0c012b44489771be05fecba21e79f65af4b3163b220239ef0af3ec49
   languageName: node
   linkType: hard
 
